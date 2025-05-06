@@ -1,0 +1,48 @@
+{
+  "name": "vue-plugin-skeleton",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "saas": "vite build --mode saas",
+    "box_dev": "vite build --mode box_dev",
+    "saas_dev": "vite build --mode saas_dev",
+    "generate-api": "orval"
+  },
+  "dependencies": {
+    "@ckeditor/ckeditor5-vue": "^6.0.0",
+    "ckeditor5": "^42.0.1",
+    "linkify-html": "^4.1.3",
+    "linkifyjs": "^4.1.3",
+    "vue": "^3.2.47"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
+    "@typescript-eslint/parser": "^8.32.0",
+    "@vitejs/plugin-basic-ssl": "^1.0.1",
+    "@vitejs/plugin-vue": "^3.2.0",
+    "@vue/tsconfig": "^0.7.0",
+    "axios": "^1.9.0",
+    "eslint": "^8.33.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-vue": "^9.9.0",
+    "orval": "^7.9.0",
+    "prettier": "2.7.1",
+    "sass": "^1.58.0",
+    "typescript": "~5.8.3",
+    "unplugin-auto-import": "^0.11.4",
+    "unplugin-element-plus": "^0.4.1",
+    "unplugin-icons": "^0.14.13",
+    "unplugin-vue-components": "^0.22.9",
+    "vite": "^3.2.3",
+    "vite-plugin-css-injected-by-js": "^2.4.0",
+    "vite-plugin-eslint": "^1.8.1",
+    "vite-plugin-mkcert": "^1.13.3",
+    "vite-plugin-singlefile": "^0.13.3",
+    "vue-tsc": "^2.2.8"
+  }
+}
