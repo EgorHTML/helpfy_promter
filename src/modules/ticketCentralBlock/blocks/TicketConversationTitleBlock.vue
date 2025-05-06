@@ -1,5 +1,6 @@
 <script setup>
 import { computed, inject } from 'vue'
+import BotSelectionBlock from './BotSelectionBlock.vue'
 
 const ticketValues = inject('ticketValues')
 
@@ -13,12 +14,24 @@ const createdAt = computed(() => ticketValues.value.createdAt)
     <div class="ticket-detail__unique-id">
       <strong>#{{ uniqueId }}</strong> от {{ createdAt }}
     </div>
-    <h1><i class="hde-ticket"></i> {{ title }}</h1>
+    <h1>
+      <i class="hde-ticket"></i>
+      <div class="ticket_title">{{ title }}</div>
+      <BotSelectionBlock />
+    </h1>
   </div>
 </template>
 
-<style>
+<style scoped>
 .ticket-detail__title {
   border-bottom: 1px solid #c5cad3 !important;
+}
+
+h1 {
+  align-items: center;
+}
+
+.ticket_title {
+  flex: 1;
 }
 </style>
