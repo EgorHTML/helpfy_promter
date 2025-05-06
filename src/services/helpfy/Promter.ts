@@ -1,36 +1,26 @@
 import {
   botControllerCreateCompletion,
   botControllerGetCompletionStatus,
-  botControllerFindAll,
 } from '../helpfy/api'
-import type {
-  BotsResponseDto,
-  ResponseCompletionStatusAsyncDto,
-} from './helpfy.schemas'
+import type { ResponseCompletionStatusAsyncDto } from './helpfy.schemas'
 
 export default class HelpfyPromter {
   private readonly userId: number
   private botId: string
 
-  private activeTickets: Set<string> = new Set()
-
-  public hasActiveRequests(): boolean {
-    return this.activeTickets.size > 0
-  }
+  private readonly activeTickets: Set<string> = new Set()
 
   constructor(userId: number, botId: string) {
     this.userId = userId
     this.botId = botId
   }
 
-  public setBotId(id: string) {
-    this.botId = id
+  public hasActiveRequests(): boolean {
+    return this.activeTickets.size > 0
   }
 
-  public getAllBots(): Promise<BotsResponseDto> {
-    return botControllerFindAll({ user_id: this.userId }).then(
-      (data) => data.data
-    )
+  public setBotId(id: string) {
+    this.botId = id
   }
 
   private getAnswerAsync(
