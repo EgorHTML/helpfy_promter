@@ -31,7 +31,7 @@ const handleBotSelected = (botId: number) => {
   <div class="el-button-group bot-selection-container">
     <button
       type="button"
-      class="el-button el-button--mini current-bot-button"
+      class="current-bot-button el-button-custom el-button--mini"
       :title="
         currentBot?.name
           ? `Информация о боте: ${currentBot.name}`
@@ -49,7 +49,7 @@ const handleBotSelected = (botId: number) => {
     </button>
     <button
       type="button"
-      class="el-button el-button--mini el-dropdown__caret-button"
+      class="current-bot-take-button el-button-custom el-button--mini"
       aria-label="Открыть выбор ботов"
       @click="toggleBotSelectionModal"
     >
@@ -73,6 +73,34 @@ const handleBotSelected = (botId: number) => {
 </template>
 
 <style scoped>
+.el-button-custom {
+  display: inline-block;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid #dcdfe6;
+  border-color: #dcdfe6;
+  color: #606266;
+  -webkit-appearance: none;
+  text-align: center;
+  box-sizing: border-box;
+  outline: none;
+  margin: 0;
+  transition: 0.1s;
+  font-weight: 500;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+.el-button-custom:hover,
+.el-button-custom:focus {
+  color: #23869b;
+  border-color: #bddbe1;
+  background-color: #e9f3f5;
+}
+
 .bot-selection-container {
   margin-left: 10px;
   display: inline-flex;
@@ -80,6 +108,8 @@ const handleBotSelected = (botId: number) => {
 }
 
 .current-bot-button {
+  border-width: 1px;
+
   padding: 7px 12px;
   max-width: 150px;
   overflow: hidden;
