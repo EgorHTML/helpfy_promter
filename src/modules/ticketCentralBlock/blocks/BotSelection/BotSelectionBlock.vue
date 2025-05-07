@@ -82,16 +82,12 @@ const handleBotSelected = (botId: number) => {
   border: 1px solid #dcdfe6;
   border-color: #dcdfe6;
   color: #606266;
-  -webkit-appearance: none;
   text-align: center;
   box-sizing: border-box;
   outline: none;
   margin: 0;
   transition: 0.1s;
   font-weight: 500;
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
 }
 
 .el-button-custom:hover,
