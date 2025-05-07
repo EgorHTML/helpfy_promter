@@ -3,11 +3,10 @@ import TicketConversationTitleBlock from '../blocks/ticket/TicketConversationTit
 import TicketConversationMessagesBlock from '../blocks/ticket/TicketConversationMessagesBlock.vue'
 import TicketEditor from '../blocks/ticket/TicketEditor.vue'
 import LoadingBlock from '../blocks/ticket/LoadingBlock.vue'
-import { provide, ref, watch } from 'vue'
+import { provide, ref } from 'vue'
 import HDE from '../../../plugin'
 import { getCurrentUser } from '../../../utils/user.js'
 import linkifyHtml from 'linkify-html'
-import HelpfyPromter from '../../../services/helpfy/Promter'
 import { useSelectBot } from '../composables/useSelectBot'
 
 type UserType = 'staff' | 'user'
@@ -23,7 +22,7 @@ interface IMessage {
   }
 }
 
-const { currentBot } = useSelectBot()
+const { currentBot, promter } = useSelectBot()
 
 const ticketValues = ref(HDE.getState().ticketValues)
 const defaultBotName = 'Суфлёр'
@@ -37,39 +36,10 @@ const messages = ref<IMessage[]>([])
 const currentUser = getCurrentUser()
 const loadingAnswer = ref(false)
 
-let promter: HelpfyPromter | null = null
-
-watch(
-  currentBot,
-  (newBot, oldBot) => {
-    if (newBot) {
-      const userIdString = HDE.vars.User_id
-      if (!userIdString) {
-        console.error('User_id не найден в HDE.vars для Promter.')
-        promter = null
-        return
-      }
-      const userId = parseInt(userIdString, 10)
-      if (isNaN(userId)) {
-        console.error('User_id не является числом для Promter:', userIdString)
-        promter = null
-        return
-      }
-
-      if (!promter || (oldBot && newBot.id !== oldBot.id)) {
-        promter = new HelpfyPromter(userId, String(newBot.id))
-      }
-    } else {
-      promter = null
-    }
-  },
-  { immediate: true }
-)
-
 provide('ticketValues', ticketValues)
 
 async function submit(textarea: string) {
-  if (!promter) {
+  if (!promter.value) {
     addMessage({
       id: messages.value.length + 1,
       content: 'Суфлёр не активен. Пожалуйста, выберите бота в настройках.',
@@ -84,22 +54,16 @@ async function submit(textarea: string) {
     return
   }
 
-  if (currentUser) {
-    addMessage({
-      id: messages.value.length + 1,
-      content: textarea,
-      user: {
-        name: currentUser.name,
-        id: currentUser.id,
-        imageUrl: currentUser.image,
-        type: 'staff',
-      },
-    })
-  } else {
-    console.warn(
-      'Текущий пользователь не определен, сообщение не будет добавлено от его имени.'
-    )
-  }
+  addMessage({
+    id: messages.value.length + 1,
+    content: textarea,
+    user: {
+      name: currentUser.name ?? 'Неизвестный',
+      id: currentUser.id,
+      imageUrl: currentUser.image,
+      type: 'staff',
+    },
+  })
 
   setLoading(true)
   try {
@@ -107,16 +71,16 @@ async function submit(textarea: string) {
   } catch (error: any) {
     console.error('Ошибка при получении ответа от суфлёра:', error)
   } finally {
-    if (promter && !promter.hasActiveRequests()) {
+    if (promter.value && !promter.value.hasActiveRequests()) {
       setLoading(false)
-    } else if (!promter) {
+    } else if (!promter.value) {
       setLoading(false)
     }
   }
 }
 
 async function getAnswer(textarea: string) {
-  if (!promter) {
+  if (!promter.value) {
     throw new Error('Суфлёр не настроен для отправки запроса.')
   }
 
@@ -124,7 +88,7 @@ async function getAnswer(textarea: string) {
   const botDisplayName = currentBot.value?.name || defaultBotName
 
   try {
-    const response = await promter.asc(textarea)
+    const response = await promter.value.asc(textarea)
     addMessage({
       id: messageId,
       content: response.response,

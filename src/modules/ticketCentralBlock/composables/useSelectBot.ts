@@ -1,32 +1,54 @@
-import type { BotEntity } from '@/services/helpfy/helpfy.schemas'
-import { onMounted, ref } from 'vue'
-import HDE from '../../../plugin'
+import type {
+  BotEntity,
+  UserEntityWithoutSecrets,
+} from '@/services/helpfy/helpfy.schemas'
+import { ref, watch } from 'vue'
 import { botControllerFindAll } from '@/services/helpfy/api'
+import { useUser } from './useUser'
+import HelpfyPromter from '@/services/helpfy/Promter'
 
 const currentBot = ref<BotEntity>()
 const bots = ref<BotEntity[]>([])
 const fetching = ref(false)
+const promter = ref<HelpfyPromter>()
 
 export const useSelectBot = () => {
-  onMounted(async () => {
-    const userIdString = HDE.vars.User_id
-    if (!userIdString) {
-      console.error('User_id не найден в HDE.vars')
-      fetching.value = false
-      return
-    }
+  const { user } = useUser()
 
-    const userId = parseInt(userIdString, 10)
-    if (isNaN(userId)) {
-      console.error('User_id не является числом:', userIdString)
-      fetching.value = false
-      return
+  watch(user, async (newUser) => {
+    if (bots.value.length === 0) {
+      await getAllBots(newUser)
+      takeDefaultBot()
     }
+  })
 
-    if (bots.value.length === 0 && !fetching.value) {
+  watch(
+    currentBot,
+    (newBot) => {
+      if (newBot) {
+        if (!promter.value && user.value) {
+          promter.value = new HelpfyPromter(user.value.id, String(newBot.id))
+        } else if (promter.value) {
+          promter.value?.setBotId(String(newBot.id))
+        }
+      }
+    },
+    { immediate: true }
+  )
+
+  function takeDefaultBot() {
+    if (bots.value.length > 0) {
+      currentBot.value = bots.value[0]
+    } else {
+      currentBot.value = undefined
+    }
+  }
+
+  async function getAllBots(user: UserEntityWithoutSecrets | undefined) {
+    if (!fetching.value && user) {
       fetching.value = true
       try {
-        const response = await botControllerFindAll({ user_id: userId })
+        const response = await botControllerFindAll({ user_id: user.id })
         if (response && response.data && response.data.data) {
           bots.value = response.data.data
         } else {
@@ -39,14 +61,8 @@ export const useSelectBot = () => {
       } finally {
         fetching.value = false
       }
-
-      if (bots.value.length > 0) {
-        currentBot.value = bots.value[0]
-      } else {
-        currentBot.value = undefined
-      }
     }
-  })
+  }
 
   function setBot(id: number) {
     const foundBot = bots.value.find((bot) => bot.id === id)
@@ -58,6 +74,7 @@ export const useSelectBot = () => {
   }
 
   return {
+    promter,
     currentBot,
     bots,
     setBot,
