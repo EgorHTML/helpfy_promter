@@ -8,18 +8,21 @@ import HDE from '../../../plugin'
 import { getCurrentUser } from '../../../utils/user.js'
 import linkifyHtml from 'linkify-html'
 import { useSelectBot } from '../composables/useSelectBot'
+import type { ResponseCompletionStatusAsyncDto } from '@/services/helpfy/helpfy.schemas.js'
 
 type UserType = 'staff' | 'user'
+
+interface IUserHDE {
+  name: string
+  id: number | string
+  imageUrl: string
+  type: UserType
+}
 
 interface IMessage {
   id: string | number
   content: string
-  user: {
-    name: string
-    id: number | string
-    imageUrl: string
-    type: UserType
-  }
+  user: IUserHDE
 }
 
 const { currentBot, promter } = useSelectBot()
@@ -91,7 +94,7 @@ async function getAnswer(textarea: string) {
     const response = await promter.value.asc(textarea)
     addMessage({
       id: messageId,
-      content: response.response,
+      content: interpretAIResponse(response),
       user: {
         name: botDisplayName,
         id: currentBot.value?.id || 0,
@@ -138,6 +141,47 @@ function addMessage(message: IMessage) {
     console.error('Ошибка при обработке ссылок в сообщении:', e)
   }
   messages.value = [...messages.value, message]
+}
+
+function interpretAIResponse(
+  aiResponse: ResponseCompletionStatusAsyncDto
+): string {
+  let messageText = aiResponse.response || ''
+
+  switch (aiResponse.status) {
+    case 'SUCCESS':
+      messageText = aiResponse.response || 'Ответ получен.'
+      break
+    case 'GREETING':
+      messageText = aiResponse.response || 'Приветствие от бота.'
+      break
+    case 'EMPTY_CONTEXT':
+      messageText =
+        'Недостаточно информации для ответа. Пожалуйста, уточните ваш запрос.'
+      break
+    case 'OPERATOR':
+      messageText = 'По этому вопросу вам поможет оператор. Перенаправляю...'
+      break
+    case 'SPAM':
+      messageText = 'Ваш запрос был расценен как спам.'
+      break
+    case 'ERROR':
+    case 'HTTP_ERROR':
+      messageText =
+        aiResponse.webhook_error ||
+        aiResponse.response ||
+        'Произошла ошибка при обработке вашего запроса на стороне сервера.'
+      break
+    default:
+      console.warn(
+        'TicketDetail: Неизвестный или необработанный статус ИИ:',
+        aiResponse.status
+      )
+      messageText = `Получен необработанный статус: ${
+        aiResponse.status
+      }. Ответ: ${aiResponse.response || 'Нет данных.'}`
+  }
+  return messageText
 }
 </script>
 
