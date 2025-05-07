@@ -3,7 +3,7 @@ import { defineConfig } from 'orval'
 export default defineConfig({
   petstore: {
     output: {
-      baseUrl:'https://sharkov.helpfy.ai',
+      baseUrl: 'https://sharkov.helpfy.ai',
       target: './src/api/helpfy.ts',
       client: 'axios',
       typescript: true,
