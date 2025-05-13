@@ -2,6 +2,7 @@
 import type { BotEntity } from '@/services/helpfy/helpfy.schemas'
 import type { PropType } from 'vue'
 import { computed } from 'vue'
+import HDE from '../../../../plugin'
 
 const props = defineProps({
   bot: {
@@ -34,33 +35,41 @@ const formattedDate = (dateString: string | undefined) => {
 
 const botDetails = computed(() => {
   if (!props.bot) return []
+
+  if (HDE.vars.info && String(HDE.vars.info).trim()) {
+    return [
+      { label: 'ID Бота (внутренний)', value: props.bot.id },
+      { label: 'Уникальный ID', value: props.bot.unique_id },
+      { label: 'Модель GPT', value: props.bot.gpt_model },
+      { label: 'Версия модели', value: props.bot.gpt_version },
+      {
+        label: 'Webhook URL',
+        value: props.bot.webhook_url || 'Не указан',
+        isLink: !!props.bot.webhook_url,
+      },
+      {
+        label: 'Создатель',
+        value: (props.bot.user && props.bot.user.name) || 'N/A',
+      },
+      {
+        label: 'Клиент',
+        value: (props.bot.client && props.bot.client.client) || 'N/A',
+      },
+      { label: 'Дата создания', value: formattedDate(props.bot.created_at) },
+      {
+        label: 'Последнее обновление',
+        value: formattedDate(props.bot.updated_at),
+      },
+      {
+        label: 'ID Профиля интеграции',
+        value: props.bot.integration_profile_id || 'N/A',
+      },
+    ]
+  }
+
   return [
-    { label: 'ID Бота (внутренний)', value: props.bot.id },
-    { label: 'Уникальный ID', value: props.bot.unique_id },
     { label: 'Модель GPT', value: props.bot.gpt_model },
     { label: 'Версия модели', value: props.bot.gpt_version },
-    {
-      label: 'Webhook URL',
-      value: props.bot.webhook_url || 'Не указан',
-      isLink: !!props.bot.webhook_url,
-    },
-    {
-      label: 'Создатель',
-      value: (props.bot.user && props.bot.user.name) || 'N/A',
-    },
-    {
-      label: 'Клиент',
-      value: (props.bot.client && props.bot.client.client) || 'N/A',
-    },
-    { label: 'Дата создания', value: formattedDate(props.bot.created_at) },
-    {
-      label: 'Последнее обновление',
-      value: formattedDate(props.bot.updated_at),
-    },
-    {
-      label: 'ID Профиля интеграции',
-      value: props.bot.integration_profile_id || 'N/A',
-    },
   ]
 })
 </script>
