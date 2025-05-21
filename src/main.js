@@ -7,12 +7,21 @@ import '@ckeditor/ckeditor5-theme-lark/dist/index.css'
 HDE.on('ready', async () => {
   const state = HDE.getState()
   let { plugin } = state
+
+  let started = false
+
   plugin.showButton = true
   HDE.emit('setPlugin', plugin)
-  const app = createApp(App)
 
-  document.head.innerHTML += window.parent.document.head.innerHTML
+  HDE.watch('plugin', (to, from) => {
+    console.log(to, from)
+    if (!started && to.visible) {
+      const app = createApp(App)
 
-  app.use(CKEditor)
-  app.mount('#app')
+      document.head.innerHTML += window.parent.document.head.innerHTML
+
+      app.use(CKEditor)
+      app.mount('#app')
+    }
+  })
 })
