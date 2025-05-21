@@ -12,9 +12,9 @@ const bots = ref<BotEntity[]>([])
 const fetching = ref(false)
 const promter = ref<HelpfyPromter>()
 
-export const useSelectBot = () => {
-  const { user } = useUser()
+const { user } = useUser()
 
+export const useSelectBot = () => {
   watch(user, async (newUser) => {
     if (bots.value.length === 0) {
       await getAllBots(newUser)
@@ -29,7 +29,7 @@ export const useSelectBot = () => {
         if (!promter.value && user.value) {
           promter.value = new HelpfyPromter(user.value.id, String(newBot.id))
         } else if (promter.value) {
-          promter.value?.setBotId(String(newBot.id))
+          promter.value.setBotId(String(newBot.id))
         }
       }
     },
