@@ -22,6 +22,47 @@ export default class HelpfyPromter {
     this.botId = botId
   }
 
+  public static interpretAIResponse(
+    aiResponse: ResponseCompletionStatusAsyncDto
+  ): string {
+    let messageText = aiResponse.response || ''
+
+    switch (aiResponse.status) {
+      case 'SUCCESS':
+        messageText = aiResponse.response || 'Ответ получен.'
+        break
+      case 'GREETING':
+        messageText = aiResponse.response || 'Приветствие от бота.'
+        break
+      case 'EMPTY_CONTEXT':
+        messageText =
+          'Недостаточно информации для ответа. Пожалуйста, уточните ваш запрос.'
+        break
+      case 'OPERATOR':
+        messageText = 'По этому вопросу вам поможет оператор. Перенаправляю...'
+        break
+      case 'SPAM':
+        messageText = 'Ваш запрос был расценен как спам.'
+        break
+      case 'ERROR':
+      case 'HTTP_ERROR':
+        messageText =
+          aiResponse.webhook_error ||
+          aiResponse.response ||
+          'Произошла ошибка при обработке вашего запроса на стороне сервера.'
+        break
+      default:
+        console.warn(
+          'TicketDetail: Неизвестный или необработанный статус ИИ:',
+          aiResponse.status
+        )
+        messageText = `Получен необработанный статус: ${
+          aiResponse.status
+        }. Ответ: ${aiResponse.response || 'Нет данных.'}`
+    }
+    return messageText
+  }
+
   public hasActiveRequests(): boolean {
     return this.activeTickets.size > 0
   }
