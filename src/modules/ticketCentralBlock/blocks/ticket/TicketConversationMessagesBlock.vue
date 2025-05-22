@@ -1,6 +1,7 @@
-<script setup>
-import { computed } from 'vue'
+<script setup lang="ts">
+import { computed, type PropType } from 'vue'
 import TicketConversationMessage from '../../components/TicketConversationMessage.vue'
+import type { IMessage } from '../../composables/useTicket'
 
 const props = defineProps({
   messages: {
@@ -8,11 +9,15 @@ const props = defineProps({
     default() {
       return []
     },
-    type: Array,
+    type: Array as PropType<IMessage[]>,
   },
 })
 
 const messages = computed(() => props.messages)
+
+function sendMessageToTicket(message: IMessage) {
+  console.log(message)
+}
 </script>
 
 <template>
@@ -22,6 +27,7 @@ const messages = computed(() => props.messages)
       :key="message.id"
       :message="message"
       :scroll-to-last-message="messages.length - 1 === index"
+      @create:message="sendMessageToTicket"
     />
   </div>
 </template>

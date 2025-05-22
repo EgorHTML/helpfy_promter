@@ -1,29 +1,24 @@
-<script setup>
-import { computed, ref, onMounted } from 'vue'
+<script setup lang="ts">
+import { computed, ref, onMounted, type PropType } from 'vue'
+import type { IMessage } from '../composables/useTicket'
 
 const props = defineProps({
   message: {
+    type: Object as PropType<IMessage>,
     required: true,
-    type: Object,
-    default() {
-      return {
-        user: {
-          id: 1,
-          name: 'Егор',
-          imageUrl: '',
-          type: 'staff',
-        },
-        content: 'text',
-        id: 1,
-      }
-    },
   },
   scrollToLastMessage: {
-    type: Boolean,
+    type: Object as PropType<boolean>,
     required: false,
-    default: false,
+    default: () => {
+      return false
+    },
   },
 })
+
+const emit = defineEmits<{
+  'create:message': [message: IMessage]
+}>()
 
 const user = computed(() => props.message.user)
 
@@ -33,8 +28,8 @@ onMounted(() => {
   if (props.scrollToLastMessage) message.value.scrollIntoView()
 })
 
-function parseCalendarNumber(num) {
-  return num < 10 && !isNaN(num) ? '0' + num : num
+function parseCalendarNumber(num: number): string {
+  return num < 10 && !isNaN(num) ? '0' + num : String(num)
 }
 
 function getDateMessage() {
@@ -49,6 +44,10 @@ function getDateMessage() {
 
 function copy() {
   navigator.clipboard.writeText(props.message.content)
+}
+
+function send() {
+  emit('create:message', props.message)
 }
 </script>
 
@@ -95,6 +94,13 @@ function copy() {
             @click="copy"
           >
             <i class="hde-ticket"></i>
+          </button>
+          <button
+            title="Отправить сообщение"
+            class="ticket-conversation__actions-create-ticket-from-post-button"
+            @click="send"
+          >
+            <i class="el-icon-s-promotion"></i>
           </button>
         </span>
       </div>
