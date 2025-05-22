@@ -91,13 +91,6 @@ export default class HelpfyPromter {
       )
     }
 
-    if (!text || !text.trim()) {
-      throw new HelpfyPromterError(
-        'Prompt не может быть пустым.',
-        'INITIALIZATION_ERROR'
-      )
-    }
-
     const createDto: CreateBotCompletionDto = {
       user_id: this.userId,
       prompt: text,
