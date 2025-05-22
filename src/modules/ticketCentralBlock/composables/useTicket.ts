@@ -3,6 +3,7 @@ import linkifyHtml from 'linkify-html'
 import { ref } from 'vue'
 import { useSelectBot } from './useSelectBot'
 import { getCurrentUser } from '@/utils/user'
+import { HelpfyPromterError } from '@/services/helpfy/HelpfyPromterError'
 
 type UserType = 'staff' | 'user'
 
@@ -19,9 +20,11 @@ interface IMessage {
   user: IUserHDE
 }
 
+const messages = ref<IMessage[]>([])
+const amountLoadingRequest = ref(0)
+const loadingAnswer = ref(false)
+
 export const useTicket = () => {
-  const messages = ref<IMessage[]>([])
-  const loadingAnswer = ref(false)
   const { currentBot, promter } = useSelectBot()
 
   const currentUser = getCurrentUser()
@@ -30,18 +33,7 @@ export const useTicket = () => {
 
   async function submit(textarea: string) {
     if (!promter.value) {
-      addMessage({
-        id: messages.value.length + 1,
-        content: 'Суфлёр не активен. Пожалуйста, выберите бота в настройках.',
-        user: {
-          name: 'Система',
-          id: 'system_error',
-          imageUrl: '',
-          type: 'user',
-        },
-      })
-      setLoading(false)
-      return
+      throw new HelpfyPromterError('Суфлер не инициализирован')
     }
 
     addMessage({
@@ -110,7 +102,15 @@ export const useTicket = () => {
   }
 
   function setLoading(flag: boolean) {
-    loadingAnswer.value = flag
+    if (flag) {
+      amountLoadingRequest.value = amountLoadingRequest.value + 1
+      loadingAnswer.value = flag
+    } else {
+      amountLoadingRequest.value =
+        amountLoadingRequest.value > 1 ? amountLoadingRequest.value - 1 : 0
+
+      if (amountLoadingRequest.value === 0) loadingAnswer.value = flag
+    }
   }
 
   function addMessage(message: IMessage) {
