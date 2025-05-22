@@ -5,7 +5,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["vite/client"],
+    "types": ["vite/client","unplugin-vue-define-options/types"],
     "allowJs": true,
     "strict": true,
     "skipLibCheck": true
