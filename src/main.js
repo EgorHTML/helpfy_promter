@@ -47,10 +47,10 @@ HDE.on('ready', async () => {
 
   async function start() {
     if (started) return false
+    started = true
 
     const App = await import('./App.vue')
 
-    started = true
     const app = createApp(App.default)
 
     document.head.innerHTML += window.parent.document.head.innerHTML
