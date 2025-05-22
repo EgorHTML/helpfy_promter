@@ -1,17 +1,21 @@
 export interface IHandlerButton {
   id: string
-  delegate: () => any
+  delegate: (message: HTMLElement) => any
   title: string
 }
 
 export class HandlerButton implements IHandlerButton {
   id: string
-  delegate: () => any
+  delegate: (message: HTMLElement) => any
   title: string
 
   buttonHandler: HTMLButtonElement | undefined
 
-  constructor(id: string, delegate: () => any, title: string = 'handler') {
+  constructor(
+    id: string,
+    delegate: (message: HTMLElement) => any,
+    title: string = 'handler'
+  ) {
     this.id = id
     this.delegate = delegate
     this.title = title
@@ -108,7 +112,7 @@ export class HandlerButton implements IHandlerButton {
 
     if (this.buttonHandler) {
       const plugin = this.buttonHandler.cloneNode(true)
-      plugin.addEventListener('click', this.delegate)
+      plugin.addEventListener('click', this.delegate.bind(this, messageNode))
       plugins?.appendChild(plugin)
     }
   }
