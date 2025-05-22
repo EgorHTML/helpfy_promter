@@ -1,28 +1,59 @@
 import { createApp } from 'vue'
-import App from './App.vue'
 import HDE from './plugin'
 import CKEditor from '@ckeditor/ckeditor5-vue'
 import '@ckeditor/ckeditor5-theme-lark/dist/index.css'
-import { addHandlerButton } from './modules/ticketCentralBlock/plugins/addHandlerButtonToMessage'
+import { HandlerButton } from './modules/ticketCentralBlock/plugins/HandlerButton'
 
 HDE.on('ready', async () => {
   const state = HDE.getState()
-  let { plugin } = state
+  const { plugin } = state
   let started = false
 
   plugin.showButton = true
   HDE.emit('setPlugin', plugin)
 
-  addHandlerButton()
+  new HandlerButton('take-message', askPromter, 'Спросить у суфлера')
+
+  async function askPromter(message) {
+    await start()
+    const ticketModule = await import(
+      './modules/ticketCentralBlock/composables/useTicket'
+    )
+
+    const useTicket = ticketModule.useTicket
+
+    const { addMessageHandler } = useTicket()
+
+    try {
+      await addMessageHandler(
+        message.querySelector('.ticket-conversation__message-html').innerHTML
+      )
+    } catch (error) {
+      setTimeout(async () => {
+        await addMessageHandler(
+          message.querySelector('.ticket-conversation__message-html').innerHTML
+        )
+      }, 500)
+    }
+  }
 
   HDE.watch('plugin', (to) => {
     if (!started && to.visible) {
-      const app = createApp(App)
-
-      document.head.innerHTML += window.parent.document.head.innerHTML
-
-      app.use(CKEditor)
-      app.mount('#app')
+      start()
     }
   })
+
+  async function start() {
+    if (started) return false
+
+    const App = await import('./App.vue')
+
+    started = true
+    const app = createApp(App.default)
+
+    document.head.innerHTML += window.parent.document.head.innerHTML
+
+    app.use(CKEditor)
+    app.mount('#app')
+  }
 })
