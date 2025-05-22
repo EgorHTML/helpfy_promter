@@ -56,7 +56,7 @@ export class HandlerButton implements IHandlerButton {
   </i>`
 
     const config = { attributes: false, childList: true, subtree: true }
-    const observer = new MutationObserver(this.onMessage)
+    const observer = new MutationObserver(this.onMessage.bind(this))
     const messagesContainer = window.parent.document.querySelector(
       '.ticket-conversation__messages'
     )
