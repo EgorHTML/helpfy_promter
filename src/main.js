@@ -3,6 +3,7 @@ import HDE from './plugin'
 import CKEditor from '@ckeditor/ckeditor5-vue'
 import '@ckeditor/ckeditor5-theme-lark/dist/index.css'
 import { HandlerButton } from './modules/ticketCentralBlock/plugins/HandlerButton'
+import { clickOnPluginButton } from './modules/ticketCentralBlock/plugins/pluginButton'
 
 HDE.on('ready', async () => {
   const state = HDE.getState()
@@ -25,6 +26,7 @@ HDE.on('ready', async () => {
     const { addMessageHandler } = useTicket()
 
     try {
+      clickOnPluginButton(plugin)
       await addMessageHandler(
         message.querySelector('.ticket-conversation__message-html').innerHTML
       )
