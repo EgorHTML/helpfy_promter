@@ -1,6 +1,7 @@
 <script setup>
 import { ClassicEditor, Essentials, Mention, Paragraph } from 'ckeditor5'
 import { ref } from 'vue'
+import EvaluationForm from '../evaluation/EvaluationForm.vue'
 
 const emit = defineEmits(['submit'])
 
@@ -27,17 +28,28 @@ function submit() {
       :editor="ClassicEditor"
       :config="editorConfig"
     ></ckeditor>
-    <button
-      class="el-button el-button--primary el-button--mini"
-      style="float: right"
-      @click="submit"
-    >
-      Добавить ответ
-    </button>
+
+    <div class="button-group">
+      <EvaluationForm />
+      <button
+        class="el-button el-button--primary el-button--mini"
+        style="float: right; margin: 0; align-self: center"
+        @click="submit"
+      >
+        Добавить ответ
+      </button>
+    </div>
   </div>
 </template>
 
 <style>
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 20px;
+}
+
 .ck.ck-editor__editable > .ck-placeholder::before {
   color: #606266 !important;
 }
@@ -45,6 +57,9 @@ function submit() {
   display: none;
 }
 .ticket-detail__editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   border-top: 1px solid #ccced1 !important;
   flex: 1;
   margin: 10px 5px;
