@@ -26,12 +26,12 @@ const messages = ref<IMessage[]>([])
 const amountLoadingRequest = ref(0)
 const loadingAnswer = ref(false)
 
+const currentUser = getCurrentUser()
+const defaultBotName = 'Суфлёр'
+const botImageUrl = import.meta.env.VITE_BOT_IMAGE_URL
+
 export const useTicket = () => {
   const { currentBot, promter } = useSelectBot()
-
-  const currentUser = getCurrentUser()
-  const defaultBotName = 'Суфлёр'
-  const botImageUrl = import.meta.env.VITE_BOT_IMAGE_URL
 
   async function submit(textarea: string) {
     if (!promter.value) {
