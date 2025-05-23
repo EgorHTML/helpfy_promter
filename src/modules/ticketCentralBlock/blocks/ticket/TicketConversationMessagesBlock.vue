@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
-import TicketConversationMessage from '../../components/TicketConversationMessage.vue'
+import TicketConversationMessage from '../../components/ticket/TicketConversationMessage.vue'
 import { useTicket, type IMessage } from '../../composables/useTicket'
 
 const props = defineProps({

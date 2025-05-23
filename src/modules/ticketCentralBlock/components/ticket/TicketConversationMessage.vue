@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, type PropType } from 'vue'
-import type { IMessage } from '../composables/useTicket'
+import type { IMessage } from '../../composables/useTicket'
 
 const props = defineProps({
   message: {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import DislikeButton from '../../components/DislikeButton.vue'
-import LikeButton from '../../components/LikeButton.vue'
+import DislikeButton from '../../components/buttons/DislikeButton.vue'
+import LikeButton from '../../components/buttons/LikeButton.vue'
 </script>
 
 <template>
