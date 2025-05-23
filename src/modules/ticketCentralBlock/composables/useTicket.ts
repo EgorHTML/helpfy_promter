@@ -4,6 +4,8 @@ import { useSelectBot } from './useSelectBot'
 import { getCurrentUser } from '@/utils/user'
 import { HelpfyPromterError } from '@/services/helpfy/HelpfyPromterError'
 import HelpfyPromter from '@/services/helpfy/Promter'
+import HDE from '../../../plugin'
+import { clickOnPluginButton } from '../plugins/pluginButton'
 
 type UserType = 'staff' | 'user'
 
@@ -131,11 +133,31 @@ export const useTicket = () => {
     messages.value = [...messages.value, message]
   }
 
-  function sendMessageToMainTicket() {}
+  function sendMessageToMainTicket(message: IMessage) {
+    const addMessageButton = window.parent.document.querySelector(
+      '.ticket-editor__add-post-dropdown button'
+    ) as HTMLElement
+
+    if (!addMessageButton)
+      throw new Error(
+        'Возникла ошибка при отправке сообщения в основную заявку'
+      )
+
+    HDE.emit('setTicketValue', {
+      field: 'editorContent',
+      value: message.content.replaceAll('\n', '<br>'),
+    })
+
+    setTimeout(() => {
+      clickOnPluginButton(HDE.getState().plugin)
+      addMessageButton.click()
+    }, 100)
+  }
 
   return {
     addMessageHandler: submit,
     loadingAnswer,
     messages,
+    sendMessageToMainTicket,
   }
 }
