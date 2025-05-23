@@ -1,27 +1,21 @@
 module.exports = {
   env: {
     node: true,
-    browser: true, 
-    es2022 : true, 
+    browser: true,
+    es2022: true,
   },
-  parser: '@typescript-eslint/parser', 
+  parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 2022, 
-    sourceType: 'module', 
-     project: './tsconfig.json', 
+    ecmaVersion: 2022,
+    sourceType: 'module',
   },
   extends: [
     'eslint:recommended',
-    'plugin:@typescript-eslint/recommended', 
-    'plugin:vue/vue3-recommended', 
-    'prettier', 
-    +   '@vue/eslint-config-typescript/recommended'  
-  ],
-  plugins: [
-    '@typescript-eslint/eslint-plugin', 
+    'plugin:@typescript-eslint/recommended',
+    'plugin:vue/vue3-recommended',
     'prettier',
-    'vue'
   ],
+  plugins: ['@typescript-eslint/eslint-plugin', 'prettier'],
   rules: {
     'prettier/prettier': [
       'error',
@@ -53,11 +47,10 @@ module.exports = {
   overrides: [
     {
       files: ['*.vue'],
-      parser: 'vue-eslint-parser', 
+      parser: 'vue-eslint-parser',
       parserOptions: {
         parser: '@typescript-eslint/parser',
         sourceType: 'module',
-        extraFileExtensions: ['.vue']
       },
     },
   ],
