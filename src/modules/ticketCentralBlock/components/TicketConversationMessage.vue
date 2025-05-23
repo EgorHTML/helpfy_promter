@@ -8,7 +8,7 @@ const props = defineProps({
     required: true,
   },
   scrollToLastMessage: {
-    type: Object as PropType<boolean>,
+    type: Boolean,
     required: false,
     default: () => {
       return false
@@ -22,10 +22,10 @@ const emit = defineEmits<{
 
 const user = computed(() => props.message.user)
 
-const message = ref()
+const messageRef = ref()
 
 onMounted(() => {
-  if (props.scrollToLastMessage) message.value.scrollIntoView()
+  if (props.scrollToLastMessage) messageRef.value.scrollIntoView()
 })
 
 function parseCalendarNumber(num: number): string {
@@ -53,7 +53,7 @@ function send() {
 
 <template>
   <div
-    ref="message"
+    ref="messageRef"
     class="ticket-conversation__message"
     :class="`ticket-conversation__message_${user.type}`"
   >
@@ -96,7 +96,7 @@ function send() {
             <i class="hde-ticket"></i>
           </button>
           <button
-            title="Отправить сообщение"
+            title="Отправить сообщение клиенту"
             class="ticket-conversation__actions-create-ticket-from-post-button"
             @click="send"
           >
