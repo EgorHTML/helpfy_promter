@@ -2,6 +2,7 @@
 import { ClassicEditor, Essentials, Mention, Paragraph } from 'ckeditor5'
 import { ref } from 'vue'
 import EvaluationForm from '../evaluation/EvaluationForm.vue'
+import { useTicket } from '../../composables/useTicket'
 
 const emit = defineEmits(['submit'])
 
@@ -12,6 +13,8 @@ const editorConfig = {
   placeholder: 'Задать вопрос',
 }
 const editor = ref()
+
+const { hasAnswerFromPromter } = useTicket()
 
 function submit() {
   emit('submit', editor.value.instance.data.get())
@@ -30,7 +33,7 @@ function submit() {
     ></ckeditor>
 
     <div class="button-group">
-      <EvaluationForm />
+      <EvaluationForm v-if="hasAnswerFromPromter" />
       <button
         class="el-button el-button--primary el-button--mini"
         style="float: right; margin: 0; align-self: center"
