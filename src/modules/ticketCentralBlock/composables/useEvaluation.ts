@@ -1,5 +1,6 @@
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import HDE from '@/plugin'
+import { useTicket } from './useTicket'
 
 export type TMark = 'like' | 'dislike'
 
@@ -17,11 +18,18 @@ interface DTOMark {
 const mark = ref<TMark | undefined>()
 const comment = ref<string>('')
 
+const markSend = ref<boolean>(false)
+
 export const useEvaluation = () => {
-  const failedSendMark = ref<boolean>(false)
+  const failedSendMark = ref<string>('')
+
+  watch(mark, () => (failedSendMark.value = ''))
 
   async function sendMark() {
-    if (!mark.value) throw new Error('Поставьте оценку')
+    if (!mark.value) {
+      failedSendMark.value = 'Поставьте оценку'
+      throw new Error('Поставьте оценку')
+    }
 
     const prevReviews = await getReviewsOfCurrentDay()
 
@@ -37,18 +45,23 @@ export const useEvaluation = () => {
       ],
     }
 
-    HDE.request({
-      method: 'POST',
-      url: `{{Reports_webhoo}}`,
-      data: JSON.stringify(data),
-      contentType: 'application/json',
-    })
-      .then(() => {
-        failedSendMark.value = false
+    try {
+      const response = await HDE.request({
+        method: 'POST',
+        url: `{{Reports_webhook}}`,
+        data: JSON.stringify(data),
+        contentType: 'application/json',
       })
-      .catch(() => {
-        failedSendMark.value = true
-      })
+
+      if (!response) {
+        throw new Error('Ошибка отправки оценки')
+      } else {
+        markSend.value = true
+        failedSendMark.value = ''
+      }
+    } catch {
+      failedSendMark.value = 'При отпраке запроса возникла ошибка'
+    }
   }
 
   async function getReviewsOfCurrentDay(): Promise<IReview[]> {
@@ -69,5 +82,5 @@ export const useEvaluation = () => {
     return `${day}.${month}.${year}`
   }
 
-  return { mark, failedSendMark, comment, sendMark }
+  return { mark, failedSendMark, comment, markSend, sendMark }
 }

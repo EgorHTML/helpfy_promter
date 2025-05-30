@@ -27,16 +27,20 @@ HDE.on('ready', async () => {
 
     try {
       clickOnPluginButton(plugin)
-      await addMessageHandler(
-        message.querySelector('.ticket-conversation__message-html').innerHTML,
-        true
-      )
+      sendMessage(true)
     } catch (error) {
       setTimeout(async () => {
-        await addMessageHandler(
-          message.querySelector('.ticket-conversation__message-html').innerHTML
-        )
+        sendMessage()
       }, 500)
+    }
+
+    function sendMessage(force = false) {
+      const messageContent = message?.querySelector(
+        '.ticket-conversation__message-html'
+      )
+      if (!messageContent)
+        return new Error('Не удалось найти сообщение для отправки')
+      addMessageHandler(messageContent.innerHTML, force)
     }
   }
 

@@ -6,24 +6,36 @@ import { computed } from 'vue'
 
 const emit = defineEmits(['close'])
 
-const { mark, comment, sendMark } = useEvaluation()
+const { mark, comment, sendMark, failedSendMark } = useEvaluation()
 
 const transcription = computed(() =>
   mark.value === 'like' ? 'нравится' : 'не нравится'
 )
 
 function send() {
-  sendMark()
+  sendMark().then(() => {
+    emit('close')
+  })
+}
+
+function closeModal() {
   emit('close')
 }
 </script>
 
 <template>
-  <ModalWindow @close="emit('close')">
+  <ModalWindow @close="closeModal">
     <template #content>
+      <div v-if="failedSendMark" style="color: var(--ck-color-base-error)">
+        {{ failedSendMark ?? 'Произошла ошибка при отправке оценки' }}
+      </div>
+
       <div v-if="!mark">
-        <h1 style="text-align: center">Оцените ответы суфлера</h1>
-        <EvaluationForm class="evaluation_form" />
+        <h1 style="text-align: center">Не забудьте оценить работу суфлёра!</h1>
+        <EvaluationForm
+          class="evaluation_form"
+          style="justify-content: center; margin-top: 10px"
+        />
       </div>
       <div v-else>
         Вам {{ transcription }} работа суфлера. По желанию вы можете оставить
@@ -47,6 +59,7 @@ function send() {
     </template>
     <template #buttons>
       <button
+        v-if="mark"
         class="el-button el-button--default el-button--mini"
         style="margin-top: 20px"
         @click="send"
@@ -56,9 +69,3 @@ function send() {
     </template>
   </ModalWindow>
 </template>
-
-<style scoped>
-.evaluation_form {
-  align-self: center;
-}
-</style>

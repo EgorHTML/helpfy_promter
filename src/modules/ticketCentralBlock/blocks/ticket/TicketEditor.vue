@@ -24,6 +24,10 @@ function submit() {
   editor.value.instance.data.set('')
   editorData.value = ''
 }
+
+function closeModal() {
+  showModal.value = false
+}
 </script>
 
 <template>
@@ -38,7 +42,7 @@ function submit() {
     <div class="button-group">
       <EvaluationModalWindow
         v-if="showModal"
-        @close="showModal = false"
+        @close="closeModal"
         @keydown.enter.stop
       />
       <EvaluationForm v-if="hasAnswerFromPromter" @click="showModal = true" />

@@ -33,7 +33,13 @@ const botImageUrl = import.meta.env.VITE_BOT_IMAGE_URL
 export const useTicket = () => {
   const { currentBot, promter } = useSelectBot()
 
-  const hasAnswerFromPromter = computed<boolean>(() => !!messages.value.length)
+  const answersFromPromter = computed(() =>
+    messages.value.filter((message) => message.user.type === 'user')
+  )
+
+  const hasAnswerFromPromter = computed<boolean>(
+    () => !!answersFromPromter.value.length
+  )
 
   async function submit(textarea: string, quickly: boolean = false) {
     if (!promter.value) {
@@ -175,5 +181,6 @@ export const useTicket = () => {
     messages,
     sendMessageToMainTicket,
     hasAnswerFromPromter,
+    answersFromPromter,
   }
 }
