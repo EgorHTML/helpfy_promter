@@ -1,10 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { ClassicEditor, Essentials, Mention, Paragraph } from 'ckeditor5'
 import { ref } from 'vue'
 import EvaluationForm from '../evaluation/EvaluationForm.vue'
 import { useTicket } from '../../composables/useTicket'
+import EvaluationModalWindow from '../../components/modals/bot/EvaluationModalWindow.vue'
 
 const emit = defineEmits(['submit'])
+
+const showModal = ref<boolean>(false)
 
 const editorData = ref('')
 const editorConfig = {
@@ -33,7 +36,12 @@ function submit() {
     ></ckeditor>
 
     <div class="button-group">
-      <EvaluationForm v-if="hasAnswerFromPromter" />
+      <EvaluationModalWindow
+        v-if="showModal"
+        @close="showModal = false"
+        @keydown.enter.stop
+      />
+      <EvaluationForm v-if="hasAnswerFromPromter" @click="showModal = true" />
       <button
         class="el-button el-button--primary el-button--mini"
         style="float: right; margin: 0; align-self: center"

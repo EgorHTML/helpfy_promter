@@ -10,17 +10,25 @@ const closeModal = () => {
   <div class="modal-overlay" @click.self="closeModal">
     <div class="modal-content">
       <slot name="content"></slot>
-      <button
-        class="close-button el-button el-button--default el-button--mini"
-        @click="closeModal"
-      >
-        Закрыть
-      </button>
+      <div class="group">
+        <button
+          class="close-button el-button el-button--default el-button--mini"
+          @click="closeModal"
+        >
+          Закрыть
+        </button>
+        <slot name="buttons"></slot>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -35,11 +43,12 @@ const closeModal = () => {
 }
 
 .modal-content {
+  gap: 20px;
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  width: 450px;
+  width: 500px;
   max-width: 90%;
   max-height: 80vh;
   overflow-y: auto;

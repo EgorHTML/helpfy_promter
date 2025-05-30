@@ -2,8 +2,8 @@
 import type { BotEntity } from '@/services/helpfy/helpfy.schemas'
 import type { PropType } from 'vue'
 import { computed } from 'vue'
-import HDE from '../../../../plugin'
-import ModalWindow from './ModalWindow.vue'
+import HDE from '@/plugin'
+import ModalWindow from '../ModalWindow.vue'
 
 const props = defineProps({
   bot: {
@@ -13,10 +13,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close'])
-
-const closeModal = () => {
-  emit('close')
-}
 
 const formattedDate = (dateString: string | undefined) => {
   if (!dateString) return 'N/A'

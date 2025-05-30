@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useSelectBot } from '../../composables/useSelectBot'
 import { ref } from 'vue'
-import BotSelectionModal from '../../components/modals/BotSelectionModal.vue'
-import CurrentBotDescriptionModal from '../../components/modals/CurrentBotDescriptionModal.vue'
+import BotSelectionModal from '../../components/modals/bot/BotSelectionModal.vue'
+import CurrentBotDescriptionModal from '../../components/modals/bot/CurrentBotDescriptionModal.vue'
 
 const { bots, currentBot, setBot, fetching } = useSelectBot()
 

@@ -2,19 +2,22 @@
 import DislikeButton from '../../components/buttons/DislikeButton.vue'
 import LikeButton from '../../components/buttons/LikeButton.vue'
 import { useEvaluation, type TMark } from '../../composables/useEvaluation'
+import { ref } from 'vue'
 
-const { setMark, sendMark } = useEvaluation()
+const { mark } = useEvaluation()
 
-function mark(flag: TMark) {
-  setMark(flag)
-  sendMark()
+const showModal = ref<boolean>(false)
+
+function setMark(flag: TMark) {
+  mark.value = flag
+  showModal.value = true
 }
 </script>
 
 <template>
   <div class="evaluation_buttons">
-    <DislikeButton @click="mark('dislike')" />
-    <LikeButton @click="mark('like')" />
+    <DislikeButton @click="setMark('dislike')" />
+    <LikeButton @click="setMark('like')" />
   </div>
 </template>
 <style scoped>

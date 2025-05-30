@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { BotEntity } from '@/services/helpfy/helpfy.schemas'
 import type { PropType } from 'vue'
-import { useSelectBot } from '../../composables/useSelectBot'
-import ModalWindow from '../../components/modals/ModalWindow.vue'
+import { useSelectBot } from '../../../composables/useSelectBot'
+import ModalWindow from '../ModalWindow.vue'
 
 defineProps({
   bots: {

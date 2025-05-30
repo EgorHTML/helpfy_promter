@@ -20,14 +20,6 @@ const comment = ref<string>('')
 export const useEvaluation = () => {
   const failedSendMark = ref<boolean>(false)
 
-  function setMark(flag: TMark) {
-    mark.value = flag
-  }
-
-  function setComment(text: string) {
-    comment.value = text
-  }
-
   async function sendMark() {
     if (!mark.value) throw new Error('Поставьте оценку')
 
@@ -77,5 +69,5 @@ export const useEvaluation = () => {
     return `${day}.${month}.${year}`
   }
 
-  return { mark, failedSendMark, setMark, setComment, sendMark }
+  return { mark, failedSendMark, comment, sendMark }
 }
