@@ -28,7 +28,8 @@ HDE.on('ready', async () => {
     try {
       clickOnPluginButton(plugin)
       await addMessageHandler(
-        message.querySelector('.ticket-conversation__message-html').innerHTML
+        message.querySelector('.ticket-conversation__message-html').innerHTML,
+        true
       )
     } catch (error) {
       setTimeout(async () => {

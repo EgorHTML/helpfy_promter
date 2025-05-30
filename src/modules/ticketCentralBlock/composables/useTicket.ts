@@ -1,5 +1,5 @@
 import linkifyHtml from 'linkify-html'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useSelectBot } from './useSelectBot'
 import { getCurrentUser } from '@/utils/user'
 import { HelpfyPromterError } from '@/services/helpfy/HelpfyPromterError'
@@ -33,8 +33,23 @@ const botImageUrl = import.meta.env.VITE_BOT_IMAGE_URL
 export const useTicket = () => {
   const { currentBot, promter } = useSelectBot()
 
-  async function submit(textarea: string) {
+  const hasAnswerFromPromter = computed<boolean>(() => !!messages.value.length)
+
+  async function submit(textarea: string, quickly: boolean = false) {
     if (!promter.value) {
+      if (!quickly) {
+        addMessage({
+          id: messages.value.length + 1,
+          content: 'Суфлёр не активен. Пожалуйста, выберите бота в настройках.',
+          user: {
+            name: 'Система',
+            id: 'system_error',
+            imageUrl: '',
+            type: 'user',
+          },
+        })
+      }
+
       throw new HelpfyPromterError('Суфлер не инициализирован')
     }
 
@@ -159,5 +174,6 @@ export const useTicket = () => {
     loadingAnswer,
     messages,
     sendMessageToMainTicket,
+    hasAnswerFromPromter,
   }
 }
