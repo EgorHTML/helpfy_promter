@@ -2,7 +2,7 @@
 import { useEvaluation } from '@/modules/ticketCentralBlock/composables/useEvaluation'
 import ModalWindow from '../ModalWindow.vue'
 import EvaluationForm from '@/modules/ticketCentralBlock/blocks/evaluation/EvaluationForm.vue'
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 const emit = defineEmits(['close'])
 
@@ -11,6 +11,12 @@ const { mark, comment, sendMark, failedSendMark } = useEvaluation()
 const transcription = computed(() =>
   mark.value === 'like' ? 'нравится' : 'не нравится'
 )
+
+const textarea = ref()
+
+onMounted(() => {
+  textarea.value?.focus()
+})
 
 function send() {
   sendMark().then(() => {
@@ -24,7 +30,7 @@ function closeModal() {
 </script>
 
 <template>
-  <ModalWindow @close="closeModal">
+  <ModalWindow @close="closeModal" @keydown.enter.prevent="send">
     <template #content>
       <div v-if="failedSendMark" style="color: var(--ck-color-base-error)">
         {{ failedSendMark ?? 'Произошла ошибка при отправке оценки' }}
@@ -47,6 +53,7 @@ function closeModal() {
           <div data-v-6784100c="" class="el-textarea el-input--mini">
             <textarea
               id="comment"
+              ref="textarea"
               v-model="comment"
               autocomplete="off"
               class="el-textarea__inner"
