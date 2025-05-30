@@ -2,6 +2,7 @@
 import type { BotEntity } from '@/services/helpfy/helpfy.schemas'
 import type { PropType } from 'vue'
 import { useSelectBot } from '../../composables/useSelectBot'
+import ModalWindow from '../../components/modals/ModalWindow.vue'
 
 defineProps({
   bots: {
@@ -21,15 +22,11 @@ const { fetching } = useSelectBot()
 const selectBot = (botId: number) => {
   emit('select-bot', botId)
 }
-
-const closeModal = () => {
-  emit('close')
-}
 </script>
 
 <template>
-  <div class="bot-selection-modal-overlay" @click.self="closeModal">
-    <div class="bot-selection-modal-content">
+  <ModalWindow @close="emit('close')">
+    <template #content>
       <h3>Выберите бота</h3>
       <div v-if="fetching" class="loading-indicator">Загрузка ботов...</div>
       <ul v-else-if="bots.length > 0" class="bot-list">
@@ -57,57 +54,11 @@ const closeModal = () => {
         </li>
       </ul>
       <p v-else>Список ботов пуст.</p>
-      <button
-        class="close-button el-button el-button--default el-button--mini"
-        @click="closeModal"
-      >
-        Закрыть
-      </button>
-    </div>
-  </div>
+    </template>
+  </ModalWindow>
 </template>
 
 <style scoped>
-.bot-selection-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2050;
-}
-
-.bot-selection-modal-content {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  width: 450px;
-  max-width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.bot-selection-modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 15px;
-  text-align: center;
-  font-size: 1.2em;
-  color: #303133;
-}
-
-.loading-indicator {
-  text-align: center;
-  padding: 20px;
-  color: #606266;
-}
-
 .bot-list {
   list-style: none;
   padding: 0;
@@ -163,10 +114,5 @@ const closeModal = () => {
 }
 .bot-detail:last-child {
   margin-bottom: 0;
-}
-
-.close-button {
-  margin-top: 20px;
-  align-self: center;
 }
 </style>
