@@ -4,8 +4,14 @@ import { useTicket } from './useTicket'
 
 export type TMark = 'like' | 'dislike'
 
+interface IOwner {
+  id: number
+  name: string
+}
+
 interface IReview {
   ticketId: number
+  owner: IOwner
   rate: TMark
   comment: string
 }
@@ -20,10 +26,17 @@ const comment = ref<string>('')
 
 const markSend = ref<boolean>(false)
 
+const { answersFromPromter } = useTicket()
+
 export const useEvaluation = () => {
   const failedSendMark = ref<string>('')
 
   watch(mark, () => (failedSendMark.value = ''))
+
+  watch(answersFromPromter, () => {
+    markSend.value = false
+    mark.value = undefined
+  })
 
   async function sendMark() {
     if (!mark.value) {
@@ -41,6 +54,7 @@ export const useEvaluation = () => {
           rate: mark.value,
           comment: comment.value,
           ticketId: HDE.getState().ticketId,
+          owner: getCurrentOwner(),
         },
       ],
     }
@@ -61,6 +75,23 @@ export const useEvaluation = () => {
       }
     } catch {
       failedSendMark.value = 'При отпраке запроса возникла ошибка'
+    }
+  }
+
+  function getCurrentOwner(): IOwner {
+    const state = HDE.getState()
+    const ownerId = state.ticketValues.ownerId
+
+    if (ownerId) {
+      const owners: IOwner[] = state.ticketData.owners
+
+      const owner: IOwner | undefined = owners.find(
+        (owner) => owner.id === ownerId
+      )
+
+      return owner ?? { id: ownerId, name: 'Сотрудник' }
+    } else {
+      return { id: 0, name: 'Исполнитель не был присвоен' }
     }
   }
 
