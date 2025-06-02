@@ -3,34 +3,26 @@ import TicketConversationTitleBlock from '../blocks/ticket/TicketConversationTit
 import TicketConversationMessagesBlock from '../blocks/ticket/TicketConversationMessagesBlock.vue'
 import TicketEditor from '../blocks/ticket/TicketEditor.vue'
 import LoadingBlock from '../blocks/ticket/LoadingBlock.vue'
-import { nextTick, provide, ref, watch } from 'vue'
+import { provide, ref } from 'vue'
 import HDE from '../../../plugin'
 import { useTicket } from '../composables/useTicket'
 import EvaluationModalWindow from '../components/modals/bot/EvaluationModalWindow.vue'
 import { useEvaluation } from '../composables/useEvaluation'
 import { clickOnPluginButton } from '../plugins/pluginButton'
 
-const { markSend } = useEvaluation()
+const { markSend, mark } = useEvaluation()
 
-const {
-  addMessageHandler,
-  messages,
-  loadingAnswer,
-  hasAnswerFromPromter,
-  answersFromPromter,
-} = useTicket()
+const { addMessageHandler, messages, loadingAnswer, hasAnswerFromPromter } =
+  useTicket()
 
 const ticketValues = ref(HDE.getState().ticketValues)
 
 const showWindow = ref<boolean>(false)
 
-watch(answersFromPromter, () => {
-  markSend.value = false
-})
-
 HDE.watch('ticketValues', (to: any) => {
   ticketValues.value = to
 })
+
 HDE.watch('plugin', async (to: any, from: any) => {
   if (
     !to.visible &&
@@ -38,6 +30,7 @@ HDE.watch('plugin', async (to: any, from: any) => {
     !markSend.value &&
     hasAnswerFromPromter.value
   ) {
+    mark.value = undefined
     clickOnPluginButton(to)
     showWindow.value = true
   }
