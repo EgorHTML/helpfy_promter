@@ -1,6 +1,8 @@
 import { ref, watch } from 'vue'
 import HDE from '@/plugin'
-import { useTicket } from './useTicket'
+import { useTicket, type IMessage } from './useTicket'
+import { createTicket } from '@/services/hde/ticket'
+import { getCurrentUser } from '@/utils/user'
 
 export type TMark = 'like' | 'dislike'
 
@@ -26,7 +28,7 @@ const comment = ref<string>('')
 
 const markSend = ref<boolean>(false)
 
-const { answersFromPromter } = useTicket()
+const { answersFromPromter, messages } = useTicket()
 
 export const useEvaluation = () => {
   const failedSendMark = ref<string>('')
@@ -72,6 +74,8 @@ export const useEvaluation = () => {
       } else {
         markSend.value = true
         failedSendMark.value = ''
+
+        createNegativeReport()
       }
     } catch {
       failedSendMark.value = 'При отпраке запроса возникла ошибка'
@@ -101,8 +105,8 @@ export const useEvaluation = () => {
       value: getCurrentDate(),
     })
 
-    if (!data?.data?.reviews) return []
-    else return data.data.reviews
+    if (Array.isArray(data?.data?.reviews)) return data.data.reviews
+    else return []
   }
 
   function getCurrentDate() {
@@ -111,6 +115,27 @@ export const useEvaluation = () => {
     const month = String(now.getMonth() + 1).padStart(2, '0')
     const year = now.getFullYear()
     return `${day}.${month}.${year}`
+  }
+
+  async function createNegativeReport() {
+    createTicket({
+      title: `[Cуфлер - Негативная оценка] - #${
+        HDE.getState().ticketValues.uniqueId
+      }`,
+      description: getCombinedPosts(messages.value),
+      user_id: getCurrentUser().id,
+    })
+  }
+
+  function getCombinedPosts(posts: IMessage[]) {
+    const state = HDE.getState()
+    let res = `<a href='${window.location.origin}/ru/ticket/list/filter/id/0/ticket/${state.ticketId}'>${state.ticketValues.uniqueId} : ${state.ticketValues.title}</a><br>`
+
+    posts.forEach((post) => {
+      res += `[${post.date_created}] ${post.user.name}: ${post.content} <br>`
+    })
+
+    return res
   }
 
   return { mark, failedSendMark, comment, markSend, sendMark }
