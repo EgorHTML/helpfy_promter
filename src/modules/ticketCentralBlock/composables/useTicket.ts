@@ -6,6 +6,7 @@ import { HelpfyPromterError } from '@/services/helpfy/HelpfyPromterError'
 import HelpfyPromter from '@/services/helpfy/Promter'
 import HDE from '../../../plugin'
 import { clickOnPluginButton } from '../plugins/pluginButton'
+import { getDateMessage } from '@/utils/messageDate'
 
 type UserType = 'staff' | 'user'
 
@@ -20,6 +21,7 @@ export interface IMessage {
   id: string | number
   content: string
   user: IUserHDE
+  date_created: string
 }
 
 const messages = ref<IMessage[]>([])
@@ -42,17 +44,24 @@ export const useTicket = () => {
   )
 
   async function submit(textarea: string, quickly: boolean = false) {
+    const message = {
+      id: messages.value.length + 1,
+      date_created: getDateMessage(),
+    }
+
+    const systemUser: IUserHDE = {
+      name: 'Система',
+      id: 'system_error',
+      imageUrl: '',
+      type: 'user',
+    }
+
     if (!promter.value) {
       if (!quickly) {
         addMessage({
-          id: messages.value.length + 1,
+          ...message,
           content: 'Суфлёр не активен. Пожалуйста, выберите бота в настройках.',
-          user: {
-            name: 'Система',
-            id: 'system_error',
-            imageUrl: '',
-            type: 'user',
-          },
+          user: systemUser,
         })
       }
 
@@ -60,7 +69,7 @@ export const useTicket = () => {
     }
 
     addMessage({
-      id: messages.value.length + 1,
+      ...message,
       content: textarea,
       user: {
         name: currentUser.name ?? 'Неизвестный',
@@ -103,6 +112,7 @@ export const useTicket = () => {
           imageUrl: botImageUrl,
           type: 'user',
         },
+        date_created: getDateMessage(),
       })
     } catch (error: any) {
       const errorMessage =
@@ -119,6 +129,7 @@ export const useTicket = () => {
           imageUrl: botImageUrl,
           type: 'user',
         },
+        date_created: getDateMessage(),
       })
       throw error
     }
