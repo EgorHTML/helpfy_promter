@@ -50,7 +50,7 @@ function closeModal() {
 
       <div class="el-form-item__content">
         <div class="ticket-fields__field-input">
-          <div data-v-6784100c="" class="el-textarea el-input--mini">
+          <div class="el-textarea el-input--mini">
             <textarea
               id="comment"
               ref="textarea"
