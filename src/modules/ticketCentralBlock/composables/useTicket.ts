@@ -4,7 +4,7 @@ import { useSelectBot } from './useSelectBot'
 import { getCurrentUser } from '@/utils/user'
 import { HelpfyPromterError } from '@/services/helpfy/HelpfyPromterError'
 import HelpfyPromter from '@/services/helpfy/Promter'
-import HDE from '../../../plugin'
+import HDE from '@/plugin'
 import { clickOnPluginButton } from '../plugins/pluginButton'
 import { getDateMessage } from '@/utils/messageDate'
 
@@ -33,7 +33,7 @@ const defaultBotName = 'Суфлёр'
 const botImageUrl = import.meta.env.VITE_BOT_IMAGE_URL
 
 export const useTicket = () => {
-  const { currentBot, promter } = useSelectBot()
+  const { currentBot, promter, bots, setBot } = useSelectBot()
 
   const answersFromPromter = computed(() =>
     messages.value.filter((message) => message.user.type === 'user')
@@ -42,6 +42,18 @@ export const useTicket = () => {
   const hasAnswerFromPromter = computed<boolean>(
     () => !!answersFromPromter.value.length
   )
+
+  async function addMessageHandlerWithAllBots(
+    textarea: string,
+    quickly: boolean = false
+  ) {
+    for (let i = 0; i < bots.value.length; i++) {
+      if (bots.value[i]) {
+        setBot(bots.value[i].id)
+        await submit(textarea, quickly)
+      }
+    }
+  }
 
   async function submit(textarea: string, quickly: boolean = false) {
     const message = {
@@ -84,6 +96,7 @@ export const useTicket = () => {
       await getAnswer(textarea)
     } catch (error: any) {
       console.error('Ошибка при получении ответа от суфлёра:', error)
+      throw error
     } finally {
       if (promter.value && !promter.value.hasActiveRequests()) {
         setLoading(false)
@@ -103,6 +116,7 @@ export const useTicket = () => {
 
     try {
       const response = await promter.value.asc(textarea)
+
       addMessage({
         id: messageId,
         content: HelpfyPromter.interpretAIResponse(response),
@@ -187,7 +201,7 @@ export const useTicket = () => {
   }
 
   return {
-    addMessageHandler: submit,
+    addMessageHandler: addMessageHandlerWithAllBots,
     loadingAnswer,
     messages,
     sendMessageToMainTicket,
