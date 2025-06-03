@@ -68,7 +68,7 @@ export const useSelectBot = () => {
     if (foundBot) {
       currentBot.value = foundBot
     } else {
-      console.warn(`Бот с ID ${id} не найден.`)
+      throw new Error(`Бот с ID ${id} не найден.`)
     }
 
     if (promter.value) {
