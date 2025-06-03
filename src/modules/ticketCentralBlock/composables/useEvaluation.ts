@@ -3,6 +3,7 @@ import HDE from '@/plugin'
 import { useTicket, type IMessage } from './useTicket'
 import { createTicket } from '@/services/hde/ticket'
 import { getCurrentUser } from '@/utils/user'
+import { removeOuterHtmlTag } from '@/utils/parseMessage'
 
 export type TMark = 'like' | 'dislike'
 
@@ -28,9 +29,8 @@ const comment = ref<string>('')
 
 const markSend = ref<boolean>(false)
 
-const { answersFromPromter, messages } = useTicket()
-
 export const useEvaluation = () => {
+  const { answersFromPromter, messages } = useTicket()
   const failedSendMark = ref<string>('')
 
   watch(mark, () => (failedSendMark.value = ''))
@@ -75,7 +75,7 @@ export const useEvaluation = () => {
         markSend.value = true
         failedSendMark.value = ''
 
-        createNegativeReport()
+        if (mark.value === 'dislike') createNegativeReport()
       }
     } catch {
       failedSendMark.value = 'При отпраке запроса возникла ошибка'
@@ -129,13 +129,15 @@ export const useEvaluation = () => {
 
   function getCombinedPosts(posts: IMessage[]) {
     const state = HDE.getState()
-    let res = `<a href='${window.location.origin}/ru/ticket/list/filter/id/0/ticket/${state.ticketId}'>${state.ticketValues.uniqueId} : ${state.ticketValues.title}</a><br>`
+    let res = `<a href='${window.location.origin}/ru/ticket/list/filter/id/0/ticket/${state.ticketId}'>${state.ticketValues.uniqueId} : ${state.ticketValues.title}</a><br><br>`
 
     posts.forEach((post) => {
-      res += `[${post.date_created}] ${post.user.name}: ${post.content} <br>`
+      res += `[${post.date_created}] ${post.user.name}: ${removeOuterHtmlTag(
+        post.content
+      )} <br>`
     })
 
-    return res
+    return res.replaceAll('\n', '<br>')
   }
 
   return { mark, failedSendMark, comment, markSend, sendMark }
