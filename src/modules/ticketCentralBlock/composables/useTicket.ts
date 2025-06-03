@@ -47,6 +47,24 @@ export const useTicket = () => {
     textarea: string,
     quickly: boolean = false
   ) {
+    if (!bots.value.length) {
+      if (!quickly) {
+        addMessage({
+          id: messages.value.length + 1,
+          date_created: getDateMessage(),
+          content: 'Суфлёр не активен. Пожалуйста, выберите бота в настройках.',
+          user: {
+            name: 'Система',
+            id: 'system_error',
+            imageUrl: '',
+            type: 'user',
+          },
+        })
+      }
+
+      throw new HelpfyPromterError('Суфлер не инициализирован')
+    }
+
     for (let i = 0; i < bots.value.length; i++) {
       if (bots.value[i]) {
         setBot(bots.value[i].id)

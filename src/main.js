@@ -24,23 +24,24 @@ HDE.on('ready', async () => {
     const useTicket = ticketModule.useTicket
 
     const { addMessageHandler } = useTicket()
-
     try {
       clickOnPluginButton(plugin)
-      sendMessage(true)
+
+      await sendMessage(true)
     } catch (error) {
       setTimeout(async () => {
         sendMessage()
       }, 500)
     }
 
-    function sendMessage(force = false) {
+    async function sendMessage(force = false) {
       const messageContent = message?.querySelector(
         '.ticket-conversation__message-html'
       )
       if (!messageContent)
-        return new Error('Не удалось найти сообщение для отправки')
-      addMessageHandler(messageContent.innerHTML, force)
+        throw new Error('Не удалось найти сообщение для отправки')
+
+      await addMessageHandler(messageContent.innerHTML, force)
     }
   }
 
