@@ -12,9 +12,8 @@ const bots = ref<BotEntity[]>([])
 const fetching = ref(false)
 const promter = ref<HelpfyPromter>()
 
-const { user } = useUser()
-
 export const useSelectBot = () => {
+  const { user } = useUser()
   watch(user, async (newUser) => {
     if (bots.value.length === 0) {
       await getAllBots(newUser)
@@ -70,6 +69,10 @@ export const useSelectBot = () => {
       currentBot.value = foundBot
     } else {
       console.warn(`Бот с ID ${id} не найден.`)
+    }
+
+    if (promter.value) {
+      promter.value.setBotId(`${id}`)
     }
   }
 
