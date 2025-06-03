@@ -62,14 +62,21 @@ export const useEvaluation = () => {
     }
 
     try {
-      const response = await HDE.request({
+      const response1 = await HDE.request({
         method: 'POST',
         url: `{{Reports_webhook}}`,
         data: JSON.stringify(data),
         contentType: 'application/json',
       })
 
-      if (!response) {
+      const response2 = await HDE.request({
+        method: 'POST',
+        url: `{{Reports_plugin}}`,
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+      })
+
+      if (!response1.data || !response2.data) {
         throw new Error('Ошибка отправки оценки')
       } else {
         markSend.value = true
