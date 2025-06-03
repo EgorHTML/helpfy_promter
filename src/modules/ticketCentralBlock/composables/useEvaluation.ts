@@ -17,6 +17,7 @@ interface IReview {
   owner: IOwner
   rate: TMark
   comment: string
+  uniqueId: string
 }
 
 interface DTOMark {
@@ -45,7 +46,7 @@ export const useEvaluation = () => {
       failedSendMark.value = 'Поставьте оценку'
       throw new Error('Поставьте оценку')
     }
-
+    const state = HDE.getState()
     const prevReviews = await getReviewsOfCurrentDay()
 
     const data: DTOMark = {
@@ -55,8 +56,9 @@ export const useEvaluation = () => {
         {
           rate: mark.value,
           comment: comment.value,
-          ticketId: HDE.getState().ticketId,
+          ticketId: state.ticketId,
           owner: getCurrentOwner(),
+          uniqueId: state.ticketValues.uniqueId,
         },
       ],
     }
