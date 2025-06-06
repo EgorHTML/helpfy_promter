@@ -24,15 +24,16 @@ HDE.watch('ticketValues', (to: any) => {
 })
 
 HDE.watch('plugin', async (to: any, from: any) => {
-  if (
-    !to.visible &&
-    from.visible &&
-    !markSend.value &&
-    hasAnswerFromPromter.value
-  ) {
+  const closeCond = !to.visible && from.visible
+
+  if (closeCond && !markSend.value && hasAnswerFromPromter.value) {
     mark.value = undefined
     clickOnPluginButton(to)
     showWindow.value = true
+
+    markSend.value = true
+  } else if (closeCond && markSend.value) {
+    showWindow.value = false
   }
 })
 
