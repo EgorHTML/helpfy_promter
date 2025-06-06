@@ -106,6 +106,15 @@ export class HandlerButton implements IHandlerButton {
 
   private setScalePluginInMessage(messageNode: HTMLElement) {
     if (!messageNode || !messageNode.dataset.postId) return false
+
+    if (
+      messageNode.querySelector(
+        `.ticket-conversation__actions-edit-button.${this.id}`
+      )
+    ) {
+      return
+    }
+
     const plugins = messageNode.querySelector(
       '.ticket-conversation__actions-btn.ticket-conversation__show-on-hover'
     )
