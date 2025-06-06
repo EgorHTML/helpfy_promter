@@ -11,6 +11,8 @@
 <style scoped>
 .ticket-detail__watching {
   position: relative;
+  background: #f4f4f5;
+  height: 39px;
 }
 
 .ticket-detail__watching-users {
