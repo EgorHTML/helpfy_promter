@@ -133,7 +133,6 @@ export default class HelpfyPromter {
     }
 
     const createDto: CreateBotCompletionDto = {
-      user_id: this.userId,
       prompt: text,
     }
 
@@ -145,11 +144,11 @@ export default class HelpfyPromter {
         createDto
       )
       const creationData = response.data
-      ticketId = creationData.ticket_id
+      ticketId = creationData.unique_id
 
       if (!ticketId) {
         throw new HelpfyPromterError(
-          'API не вернуло ticket_id при создании запроса.',
+          'API не вернуло unique_id при создании запроса.',
           'NETWORK_ERROR'
         )
       }
