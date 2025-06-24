@@ -7,6 +7,7 @@ import HelpfyPromter from '@/services/helpfy/Promter'
 import HDE from '@/plugin'
 import { clickOnPluginButton } from '../plugins/pluginButton'
 import { getDateMessage } from '@/utils/messageDate'
+import { removeAllHtmlTags } from '@/utils/parseMessage'
 
 type UserType = 'staff' | 'user'
 
@@ -79,6 +80,8 @@ export const useTicket = () => {
       date_created: getDateMessage(),
     }
 
+    const parsedText = removeAllHtmlTags(textarea)
+
     const systemUser: IUserHDE = {
       name: 'Система',
       id: 'system_error',
@@ -111,7 +114,7 @@ export const useTicket = () => {
 
     setLoading(true)
     try {
-      await getAnswer(textarea)
+      await getAnswer(parsedText)
     } catch (error: any) {
       console.error('Ошибка при получении ответа от суфлёра:', error)
       throw error

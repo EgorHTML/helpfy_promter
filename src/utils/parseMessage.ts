@@ -1,4 +1,4 @@
-export function removeOuterHtmlTag(htmlString: string) {
+export function removeOuterHtmlTag(htmlString: string): string {
   const tempElement = document.createElement('div')
   if (!tempElement) return ''
 
@@ -12,4 +12,12 @@ export function removeOuterHtmlTag(htmlString: string) {
   } else {
     return htmlString
   }
+}
+
+export function removeAllHtmlTags(htmlString: string): string {
+  const element = document.createElement('div')
+
+  element.innerHTML = htmlString
+
+  return element.textContent as string
 }
