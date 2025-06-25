@@ -136,7 +136,7 @@ export default class HelpfyPromter {
       prompt: text,
     }
 
-    let ticketId: string | undefined
+    let unique_id: string | undefined
 
     try {
       const response = await botControllerCreateCompletion(
@@ -144,17 +144,17 @@ export default class HelpfyPromter {
         createDto
       )
       const creationData = response.data
-      ticketId = creationData.unique_id
+      unique_id = creationData.unique_id
 
-      if (!ticketId) {
+      if (!unique_id) {
         throw new HelpfyPromterError(
           'API не вернуло unique_id при создании запроса.',
           'NETWORK_ERROR'
         )
       }
 
-      this.activeTickets.add(ticketId)
-      return await this.getAnswerAsync(ticketId)
+      this.activeTickets.add(unique_id)
+      return await this.getAnswerAsync(unique_id)
     } catch (error: any) {
       console.error('HelpfyPromter: Ошибка в ask:', error)
       if (error instanceof HelpfyPromterError) {
@@ -169,8 +169,8 @@ export default class HelpfyPromter {
         error
       )
     } finally {
-      if (ticketId) {
-        this.activeTickets.delete(ticketId)
+      if (unique_id) {
+        this.activeTickets.delete(unique_id)
       }
     }
   }
