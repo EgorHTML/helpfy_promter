@@ -25,6 +25,12 @@ export interface IMessage {
   date_created: string
 }
 
+export interface IMeta {
+  post_id?: number
+  ticket_id?: number
+  quickly?: number
+}
+
 const messages = ref<IMessage[]>([])
 const amountLoadingRequest = ref(0)
 const loadingAnswer = ref(false)
@@ -44,12 +50,9 @@ export const useTicket = () => {
     () => !!answersFromPromter.value.length
   )
 
-  async function addMessageHandlerWithAllBots(
-    textarea: string,
-    quickly: boolean = false
-  ) {
+  async function addMessageHandlerWithAllBots(textarea: string, meta?: IMeta) {
     if (!bots.value.length) {
-      if (!quickly) {
+      if (!meta?.quickly) {
         addMessage({
           id: messages.value.length + 1,
           date_created: getDateMessage(),
@@ -69,12 +72,12 @@ export const useTicket = () => {
     for (let i = 0; i < bots.value.length; i++) {
       if (bots.value[i]) {
         setBot(bots.value[i].id)
-        await submit(textarea, quickly)
+        await submit(textarea, meta)
       }
     }
   }
 
-  async function submit(textarea: string, quickly: boolean = false) {
+  async function submit(textarea: string, meta?: IMeta) {
     const message = {
       id: messages.value.length + 1,
       date_created: getDateMessage(),
@@ -90,7 +93,7 @@ export const useTicket = () => {
     }
 
     if (!promter.value) {
-      if (!quickly) {
+      if (!meta?.quickly) {
         addMessage({
           ...message,
           content: 'Суфлёр не активен. Пожалуйста, выберите бота в настройках.',
@@ -114,7 +117,7 @@ export const useTicket = () => {
 
     setLoading(true)
     try {
-      await getAnswer(parsedText)
+      await getAnswer(parsedText, meta)
     } catch (error: any) {
       console.error('Ошибка при получении ответа от суфлёра:', error)
       throw error
@@ -127,7 +130,7 @@ export const useTicket = () => {
     }
   }
 
-  async function getAnswer(textarea: string) {
+  async function getAnswer(textarea: string, meta?: IMeta) {
     if (!promter.value) {
       throw new Error('Суфлёр не настроен для отправки запроса.')
     }
@@ -136,7 +139,7 @@ export const useTicket = () => {
     const botDisplayName = currentBot.value?.name || defaultBotName
 
     try {
-      const response = await promter.value.asc(textarea)
+      const response = await promter.value.asc(textarea, meta)
 
       addMessage({
         id: messageId,

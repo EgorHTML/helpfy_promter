@@ -1,3 +1,4 @@
+import { IMeta } from '@/modules/ticketCentralBlock/composables/useTicket'
 import {
   botControllerCreateCompletion,
   botControllerGetCompletionStatus,
@@ -7,6 +8,7 @@ import type {
   ResponseCompletionStatusAsyncDto,
 } from './helpfy.schemas'
 import { HelpfyPromterError } from './HelpfyPromterError'
+import HDE from '@/plugin'
 
 export default class HelpfyPromter {
   private readonly userId: number
@@ -124,17 +126,24 @@ export default class HelpfyPromter {
     })
   }
 
-  public async asc(text: string): Promise<ResponseCompletionStatusAsyncDto> {
+  public async asc(
+    text: string,
+    meta?: IMeta
+  ): Promise<ResponseCompletionStatusAsyncDto> {
     if (!text || !text.trim()) {
       throw new HelpfyPromterError(
         'Prompt не может быть пустым.',
         'INITIALIZATION_ERROR'
       )
     }
-
+    const ticketId = HDE.getState().ticketId
     const createDto: CreateBotCompletionDto = {
       prompt: text,
+      meta: {
+        ticket_id: ticketId,
+      },
     }
+    if (meta?.post_id) createDto.meta!.post_id = meta.post_id
 
     let unique_id: string | undefined
 

@@ -41,7 +41,10 @@ HDE.on('ready', async () => {
       if (!messageContent)
         throw new Error('Не удалось найти сообщение для отправки')
 
-      await addMessageHandler(messageContent.innerHTML, force)
+      await addMessageHandler(messageContent.innerHTML, {
+        quickly: force,
+        post_id: +message.dataset.postId,
+      })
     }
   }
 
