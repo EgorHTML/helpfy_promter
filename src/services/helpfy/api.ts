@@ -68,7 +68,9 @@ import type {
 import HDE from '../../plugin' // Adjust path if needed
 import { buildUrlWithQuery } from '../../utils/query' // Adjust path if needed
 
-const BASE_URL = 'https://sharkov.helpfy.ai/api/v1'
+const BASE_URL = `https://${
+  HDE.vars.BASE_DOMAIN ? HDE.vars.BASE_DOMAIN : 'sharkov.helpfy.ai'
+}/api/v1`
 
 // --- Auth Controller ---
 

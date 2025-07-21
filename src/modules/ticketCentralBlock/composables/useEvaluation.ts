@@ -18,6 +18,7 @@ interface IReview {
   rate: TMark
   comment: string
   uniqueId: string
+  reviewTicketId?: number
 }
 
 interface DTOMark {
@@ -49,6 +50,8 @@ export const useEvaluation = () => {
     const state = HDE.getState()
     const prevReviews = await getReviewsOfCurrentDay()
 
+    let negativeTicket
+
     const data: DTOMark = {
       createdAt: getCurrentDate(),
       reviews: [
@@ -64,6 +67,11 @@ export const useEvaluation = () => {
     }
 
     try {
+      if (mark.value === 'dislike') {
+        negativeTicket = await createNegativeReport()
+        data.reviews[data.reviews.length - 1].reviewTicketId = negativeTicket.id
+      }
+
       const response1 = await HDE.request({
         method: 'POST',
         url: `{{Reports_webhook}}`,
@@ -83,8 +91,6 @@ export const useEvaluation = () => {
       } else {
         markSend.value = true
         failedSendMark.value = ''
-
-        if (mark.value === 'dislike') createNegativeReport()
       }
     } catch {
       failedSendMark.value = 'При отпраке запроса возникла ошибка'
@@ -127,7 +133,7 @@ export const useEvaluation = () => {
   }
 
   async function createNegativeReport() {
-    createTicket({
+    return createTicket({
       title: `[Cуфлер - Негативная оценка] - #${
         HDE.getState().ticketValues.uniqueId
       }`,

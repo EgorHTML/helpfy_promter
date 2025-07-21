@@ -11,7 +11,7 @@ export function createTicket(ticketData: CreateTicketDTO) {
     method: 'POST',
     data: JSON.stringify(ticketData),
   })
-    .then((data: any) => data.data)
+    .then((data: any) => data.data.data)
     .catch(() => {
       console.warn('Не удалось создать заявку')
     })
