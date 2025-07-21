@@ -50,6 +50,14 @@ export const useTicket = () => {
     () => !!answersFromPromter.value.length
   )
 
+  function addMessageHandlerWithCondition(textarea: string, meta?: IMeta) {
+    if (String(HDE.vars.Add_to_all_bots) === '1') {
+      addMessageHandlerWithAllBots(textarea, meta)
+    } else {
+      submit(textarea, meta)
+    }
+  }
+
   async function addMessageHandlerWithAllBots(textarea: string, meta?: IMeta) {
     if (!bots.value.length) {
       if (!meta?.quickly) {
@@ -225,7 +233,7 @@ export const useTicket = () => {
   }
 
   return {
-    addMessageHandler: addMessageHandlerWithAllBots,
+    addMessageHandler: addMessageHandlerWithCondition,
     loadingAnswer,
     messages,
     sendMessageToMainTicket,
