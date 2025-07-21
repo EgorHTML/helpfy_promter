@@ -6,6 +6,9 @@ import { ref, watch } from 'vue'
 import { botControllerFindAll } from '@/services/helpfy/api'
 import { useUser } from './useUser'
 import HelpfyPromter from '@/services/helpfy/Promter'
+import HDE from '@/plugin'
+import defaultBotConfig from '@/utils/defaultBotConfig'
+import { getCurrentUserFromMenuApp } from '@/utils/user'
 
 const currentBot = ref<BotEntity>()
 const bots = ref<BotEntity[]>([])
@@ -36,10 +39,17 @@ export const useSelectBot = () => {
   )
 
   function takeDefaultBot() {
-    if (bots.value.length > 0) {
+    if (HDE.vars.Default_bot_config_for_group) {
+      const botForGroups = defaultBotConfig()
+      const currentUser = getCurrentUserFromMenuApp()
+      const expectedId = botForGroups.get(String(currentUser.groupId))
+      const bot = bots.value.find((bot) => bot.id == expectedId)
+
+      currentBot.value = bot
+    }
+
+    if (bots.value.length > 0 && !currentBot.value) {
       currentBot.value = bots.value[0]
-    } else {
-      currentBot.value = undefined
     }
   }
 
