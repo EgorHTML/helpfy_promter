@@ -1,4 +1,4 @@
-import { IMeta } from '@/modules/ticketCentralBlock/composables/useTicket'
+import type { IMeta } from '@/modules/ticketCentralBlock/composables/useTicket'
 import {
   botControllerCreateCompletion,
   botControllerGetCompletionStatus,

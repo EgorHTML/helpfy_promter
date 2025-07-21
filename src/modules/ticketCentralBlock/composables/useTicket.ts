@@ -52,37 +52,21 @@ export const useTicket = () => {
 
   function addMessageHandlerWithCondition(textarea: string, meta?: IMeta) {
     if (String(HDE.vars.Add_to_all_bots) === '1') {
-      addMessageHandlerWithAllBots(textarea, meta)
+      return addMessageHandlerWithAllBots(textarea, meta)
     } else {
-      submit(textarea, meta)
+      return submit(textarea, meta)
     }
   }
 
   async function addMessageHandlerWithAllBots(textarea: string, meta?: IMeta) {
-    if (!bots.value.length) {
-      if (!meta?.quickly) {
-        addMessage({
-          id: messages.value.length + 1,
-          date_created: getDateMessage(),
-          content: 'Суфлёр не активен. Пожалуйста, выберите бота в настройках.',
-          user: {
-            name: 'Система',
-            id: 'system_error',
-            imageUrl: '',
-            type: 'user',
-          },
-        })
-      }
-
-      throw new HelpfyPromterError('Суфлер не инициализирован')
-    }
-
     for (let i = 0; i < bots.value.length; i++) {
       if (bots.value[i]) {
         setBot(bots.value[i].id)
         await submit(textarea, meta)
       }
     }
+
+    if (bots.value.length === 0) await submit(textarea, meta)
   }
 
   async function submit(textarea: string, meta?: IMeta) {
@@ -101,13 +85,11 @@ export const useTicket = () => {
     }
 
     if (!promter.value) {
-      if (!meta?.quickly) {
-        addMessage({
-          ...message,
-          content: 'Суфлёр не активен. Пожалуйста, выберите бота в настройках.',
-          user: systemUser,
-        })
-      }
+      addMessage({
+        ...message,
+        content: 'Суфлёр не активен. Пожалуйста, выберите бота в настройках.',
+        user: systemUser,
+      })
 
       throw new HelpfyPromterError('Суфлер не инициализирован')
     }
