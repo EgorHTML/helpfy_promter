@@ -13,15 +13,23 @@ const transcription = computed(() =>
 )
 
 const textarea = ref()
+const sendingMark = ref(false)
 
 onMounted(() => {
   textarea.value?.focus()
 })
 
 function send() {
-  sendMark().then(() => {
-    emit('close')
-  })
+  console.log('click')
+
+  sendingMark.value = true
+  sendMark()
+    .then(() => {
+      emit('close')
+    })
+    .finally(() => {
+      sendingMark.value = false
+    })
 }
 
 function closeModal() {
@@ -68,11 +76,47 @@ function closeModal() {
       <button
         v-if="mark"
         class="el-button el-button--default el-button--mini"
-        style="margin-top: 20px"
+        :class="sendingMark ? 'loading' : ''"
+        style="margin-top: 20px; position: relative"
         @click="send"
       >
         Отправить оценку
+        <span class="loader"></span>
       </button>
     </template>
   </ModalWindow>
 </template>
+
+<style scoped>
+.loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 3px solid #1e5509;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+  display: none;
+}
+
+.loading .loader {
+  display: block;
+}
+
+.loading {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+</style>
