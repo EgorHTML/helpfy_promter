@@ -40,22 +40,27 @@ export interface MasterLoginDto {
   api_key: string
 }
 
+/**
+ * Metadata to carry through to the webhook, must be a valid JSON object, max 5KB when serialized
+ */
+export type CreateBotCompletionDtoMeta = { [key: string]: unknown }
+
 export interface CreateBotCompletionDto {
-  /** User id */
-  user_id: number
   /** Prompt of the user request */
   prompt: string
+  /** Metadata to carry through to the webhook, must be a valid JSON object, max 5KB when serialized */
+  meta?: CreateBotCompletionDtoMeta
 }
 
 export interface ResponseBotCompletionDto {
   /** Response message */
   message: string
-  /** Created ticket id for request */
-  ticket_id: string
+  /** Created unique id for request */
+  unique_id: string
 }
 
 /**
- * Ticket status string
+ * Completion status string
  */
 export type ResponseCompletionStatusAsyncDtoStatus =
   typeof ResponseCompletionStatusAsyncDtoStatus[keyof typeof ResponseCompletionStatusAsyncDtoStatus]
@@ -70,22 +75,23 @@ export const ResponseCompletionStatusAsyncDtoStatus = {
   OPERATOR: 'OPERATOR',
   PENDING: 'PENDING',
   SPAM: 'SPAM',
+  NO_ANSWER: 'NO_ANSWER',
   IN_PROGRESS_RESPONSE: 'IN_PROGRESS_RESPONSE',
   IN_PROGRESS_REQUEST: 'IN_PROGRESS_REQUEST',
   RESPONSE_IN_PROCESSING: 'RESPONSE_IN_PROCESSING',
 } as const
 
 export interface ResponseCompletionStatusAsyncDto {
-  /** Unique request id */
+  /** Request id */
   id: number
-  /** Ticket status string */
+  /** Completion status string */
   status: ResponseCompletionStatusAsyncDtoStatus
   /** GPT model response text */
   response: string
   /** Your message prompt */
   prompt: string
-  /** Unique ticket id */
-  ticket_id: string
+  /** Unique completion id */
+  unique_id: string
   /** Unique user id */
   user_id: number
   /** Error message of webhook response */
@@ -256,6 +262,7 @@ export interface GPTModelVersionsDto {
 export interface LLMVersionDtoClass {
   value: string
   label: string
+  balance?: string
 }
 
 export interface CreateKnowledgeGroupDto {
@@ -526,6 +533,7 @@ export const ResponseType = {
   OPERATOR: 'OPERATOR',
   PENDING: 'PENDING',
   SPAM: 'SPAM',
+  NO_ANSWER: 'NO_ANSWER',
   IN_PROGRESS_RESPONSE: 'IN_PROGRESS_RESPONSE',
   IN_PROGRESS_REQUEST: 'IN_PROGRESS_REQUEST',
   RESPONSE_IN_PROCESSING: 'RESPONSE_IN_PROCESSING',
@@ -681,8 +689,8 @@ export interface CompletionTokenUsageEntity {
   id: number
   /** Unique string identifier */
   unique_id: string
-  /** Associated ticket identifier */
-  ticket_id: string
+  /** Associated completion unique id identifier */
+  completion_unique_id: string
   /** Creation timestamp in ISO format */
   created_at: string
   /** Associated completion log ID */
@@ -704,8 +712,6 @@ export interface CompletionLogEntityWithTokenUsage {
   user_id: number
   /** Bot identifier */
   bot_id: number
-  /** Ticket identifier associated with the completion log */
-  ticket_id: string
   /** The content of the prompt */
   prompt: string
   /**
@@ -784,8 +790,6 @@ export interface CompletionLogEntity {
   user_id: number
   /** Bot identifier */
   bot_id: number
-  /** Ticket identifier associated with the completion log */
-  ticket_id: string
   /** The content of the prompt */
   prompt: string
   /**
@@ -823,7 +827,7 @@ export interface CompletionLogEntity {
 
 export interface CompletionTokenUsageEntityWithCompletionLog {
   id: number
-  ticket_id: string
+  completion_unique_id: string
   /** Unique identifier associated with the completion token usage */
   unique_id: string
   gpt_model: string
@@ -853,8 +857,8 @@ export interface EmbeddingTokenUsageEntity {
   unique_id: string
   /** Embedding log identifier */
   embedding_log_id: number
-  /** Ticket identifier associated with the embedding embedding token usage */
-  ticket_id: string
+  /** Completion unique identifier associated with the embedding token usage */
+  completion_unique_id: string
   gpt_model: string
   gpt_version: string
   /** Token used for create embedding */
@@ -878,8 +882,8 @@ export interface EmbeddingLogEntity {
   user_id: number
   /** Bot identifier */
   bot_id: number
-  /** Ticket identifier associated with the embedding log */
-  ticket_id: string
+  /** Completion log unique id identifier associated with the embedding log */
+  completion_unique_id: string
   /** The content of the prompt */
   content: string
   /**
@@ -909,8 +913,8 @@ export interface EmbeddingTokenUsageEntityWithEmbeddingLog {
   unique_id: string
   /** Embedding log identifier */
   embedding_log_id: number
-  /** Ticket identifier associated with the embedding embedding token usage */
-  ticket_id: string
+  /** Completion unique identifier associated with the embedding token usage */
+  completion_unique_id: string
   gpt_model: string
   gpt_version: string
   /** Token used for create embedding */
@@ -950,8 +954,8 @@ export interface EmbeddingLogEntityWithEmbeddingTokenUsage {
   user_id: number
   /** Bot identifier */
   bot_id: number
-  /** Ticket identifier associated with the embedding log */
-  ticket_id: string
+  /** Completion log unique id identifier associated with the embedding log */
+  completion_unique_id: string
   /** The content of the prompt */
   content: string
   /**
@@ -1075,115 +1079,167 @@ export interface CreateYandexGPTIntegrationDto {
 }
 
 export type BotControllerFindAllParams = {
-  user_id?: number
   /**
    * Search string
    */
-  search?: unknown
+  search?: string
   /**
-   * Number of records to return (default: 10)
+   * Filter bots by user id
    */
-  take?: unknown
+  user_id?: number
   /**
    * Number of records to skip (default: 0)
    */
-  skip?: unknown
+  skip?: number
+  /**
+   * Number of records to return (default: 10)
+   */
+  take?: number
+}
+
+export type KnowledgeGroupControllerFindAllParams = {
+  /**
+   * Id of the bot to filter groups
+   */
+  bot_id: number
+  /**
+   * Search term for filtering groups
+   */
+  search?: string
+  /**
+   * Number of items to skip
+   */
+  skip?: number
+  /**
+   * Number of items to take
+   */
+  take?: number
 }
 
 export type BotAgentControllerFindAllParams = {
   /**
-   * Number of records to return (default: 10)
+   * Id of the bot whose agents we want to retrieve
    */
-  take?: unknown
+  bot_id: number
   /**
    * Number of records to skip (default: 0)
    */
-  skip?: unknown
+  skip?: number
   /**
-   * Id of the bot whose agents we want to retrieve
+   * Number of records to return (default: 10)
    */
-  bot_id: unknown
+  take?: number
 }
 
 export type KnowledgeControllerFindAllParams = {
-  take?: unknown
-  skip?: unknown
-  /**
-   * Search string
-   */
-  search?: unknown
   /**
    * Filter by knowledge group id
    */
-  group_id?: unknown
+  group_id?: number
   /**
    * Filter by bot id
    */
-  bot_id?: unknown
+  bot_id?: number
+  /**
+   * Search string
+   */
+  search?: string
+  /**
+   * Number of items to skip for pagination
+   */
+  skip?: number
+  /**
+   * Number of items to return per page
+   */
+  take?: number
 }
 
 export type UserControllerFindAllParams = {
   /**
    * Filter users by name, email and unique_id containing this string
    */
-  search?: unknown
-  /**
-   * Number of records to return (default: 10)
-   */
-  take?: unknown
+  search?: string
   /**
    * Number of records to skip for pagination (default: 0)
    */
-  skip?: unknown
+  skip?: number
+  /**
+   * Number of records to return (default: 10)
+   */
+  take?: number
 }
 
 export type ClientControllerFindAllParams = {
   /**
    * Filter clients by client and unique_id containing this string
    */
-  search?: unknown
-  /**
-   * Number of records to return (default: 10)
-   */
-  take?: unknown
-  /**
-   * Number of records to skip for pagination (default: 0)
-   */
-  skip?: unknown
-}
-
-export type FirstLineControllerFindAllParams = {
-  /**
-   * Number of records to return (default: 10)
-   */
-  take?: number
+  search?: string
   /**
    * Number of records to skip for pagination (default: 0)
    */
   skip?: number
   /**
-   * Filter by status (e.g. open, closed, etc.)
+   * Number of records to return (default: 10)
    */
-  status?: string
+  take?: number
+}
+
+export type FirstLineControllerFindAllParams = {
+  /**
+   * Filter by a specific Bot id
+   */
+  bot_id?: number
   /**
    * Search string to filter questions by text/content
    */
   search?: string
   /**
-   * Filter by a specific Bot id
+   * Filter by status (e.g. open, closed, etc.)
    */
-  bot_id?: number
+  status?: string
+  /**
+   * Number of records to skip for pagination (default: 0)
+   */
+  skip?: number
+  /**
+   * Number of records to return (default: 10)
+   */
+  take?: number
 }
 
 export type CompletionLogControllerFindAllForJournalParams = {
-  end_date?: unknown
-  start_date?: unknown
-  status?: unknown
-  ticket_id?: unknown
-  bot_id?: unknown
-  take?: unknown
-  skip?: unknown
-  search?: unknown
+  /**
+   * Id of the bot to filter logs
+   */
+  bot_id?: number
+  /**
+   * Number of items to skip for pagination
+   */
+  skip?: number
+  /**
+   * Number of items to return per page
+   */
+  take?: number
+  /**
+   * Filter logs by completion status
+   */
+  status?: string
+  /**
+   * Filter logs by unique request ID
+   */
+  unique_id?: string
+  /**
+   * Search term in logs (e.g., query or response text)
+   */
+  search?: string
+  /**
+   * Start date for filtering logs (format: YYYY-MM-DD)
+   */
+  start_date?: string
+  /**
+   * End date for filtering logs (format: YYYY-MM-DD)
+   */
+  end_date?: string
 }
 
 export type CompletionLogControllerGetLastMessagesParams = {
@@ -1191,6 +1247,71 @@ export type CompletionLogControllerGetLastMessagesParams = {
    * Number of last messages to retrieve
    */
   limit: number
+}
+
+export type CompletionTokenUsageControllerCompletionFindAllParams = {
+  /**
+   * Search term in token usage logs
+   */
+  search?: string
+  /**
+   * Number of items to skip for pagination
+   */
+  skip?: number
+  /**
+   * Number of items to return per page
+   */
+  take?: number
+}
+
+export type EmbeddingTokenUsageControllerEmbeddingFindAllParams = {
+  /**
+   * Search term in token usage logs
+   */
+  search?: string
+  /**
+   * Number of items to skip for pagination
+   */
+  skip?: number
+  /**
+   * Number of items to return per page
+   */
+  take?: number
+}
+
+export type EmbeddingLogControllerFindAllForJournalParams = {
+  /**
+   * Search term in embedding logs
+   */
+  search?: string
+  /**
+   * Number of items to skip for pagination
+   */
+  skip?: number
+  /**
+   * Number of items to return per page
+   */
+  take?: number
+  /**
+   * Filter logs by completion request ID
+   */
+  completion_unique_id?: string
+  /**
+   * Id of the bot to filter logs
+   */
+  bot_id?: number
+  /**
+   * Filter logs by status
+   */
+  status?: string
+  /**
+   * Start date for filtering logs (format: YYYY-MM-DD)
+   */
+  start_date?: string
+  /**
+   * End date for filtering logs (format: YYYY-MM-DD)
+   */
+  end_date?: string
 }
 
 export type GptIntegrationProfileControllerTestIntegration200 = {

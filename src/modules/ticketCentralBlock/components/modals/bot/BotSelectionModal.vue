@@ -40,7 +40,8 @@ const selectBot = (botId: number) => {
         >
           <div class="bot-info">
             <span class="bot-name">{{ bot.name }}</span>
-            <span class="bot-detail">ID: {{ bot.unique_id }}</span>
+            <span class="bot-detail">ID: {{ bot.id }}</span>
+            <span class="bot-detail">Unique ID: {{ bot.unique_id }}</span>
             <span class="bot-detail"
               >Модель: {{ bot.gpt_model }} ({{ bot.gpt_version }})</span
             >

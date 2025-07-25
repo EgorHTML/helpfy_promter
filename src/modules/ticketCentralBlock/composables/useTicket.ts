@@ -7,6 +7,7 @@ import HelpfyPromter from '@/services/helpfy/Promter'
 import HDE from '@/plugin'
 import { clickOnPluginButton } from '../plugins/pluginButton'
 import { getDateMessage } from '@/utils/messageDate'
+import { removeAllHtmlTags } from '@/utils/parseMessage'
 
 type UserType = 'staff' | 'user'
 
@@ -22,6 +23,12 @@ export interface IMessage {
   content: string
   user: IUserHDE
   date_created: string
+}
+
+export interface IMeta {
+  post_id?: number
+  ticket_id?: number
+  quickly?: number
 }
 
 const messages = ref<IMessage[]>([])
@@ -43,41 +50,32 @@ export const useTicket = () => {
     () => !!answersFromPromter.value.length
   )
 
-  async function addMessageHandlerWithAllBots(
-    textarea: string,
-    quickly: boolean = false
-  ) {
-    if (!bots.value.length) {
-      if (!quickly) {
-        addMessage({
-          id: messages.value.length + 1,
-          date_created: getDateMessage(),
-          content: 'Суфлёр не активен. Пожалуйста, выберите бота в настройках.',
-          user: {
-            name: 'Система',
-            id: 'system_error',
-            imageUrl: '',
-            type: 'user',
-          },
-        })
-      }
-
-      throw new HelpfyPromterError('Суфлер не инициализирован')
-    }
-
-    for (let i = 0; i < bots.value.length; i++) {
-      if (bots.value[i]) {
-        setBot(bots.value[i].id)
-        await submit(textarea, quickly)
-      }
+  function addMessageHandlerWithCondition(textarea: string, meta?: IMeta) {
+    if (String(HDE.vars.Add_to_all_bots) === '1') {
+      return addMessageHandlerWithAllBots(textarea, meta)
+    } else {
+      return submit(textarea, meta)
     }
   }
 
-  async function submit(textarea: string, quickly: boolean = false) {
+  async function addMessageHandlerWithAllBots(textarea: string, meta?: IMeta) {
+    for (let i = 0; i < bots.value.length; i++) {
+      if (bots.value[i]) {
+        setBot(bots.value[i].id)
+        await submit(textarea, meta)
+      }
+    }
+
+    if (bots.value.length === 0) await submit(textarea, meta)
+  }
+
+  async function submit(textarea: string, meta?: IMeta) {
     const message = {
       id: messages.value.length + 1,
       date_created: getDateMessage(),
     }
+
+    const parsedText = removeAllHtmlTags(textarea)
 
     const systemUser: IUserHDE = {
       name: 'Система',
@@ -87,13 +85,11 @@ export const useTicket = () => {
     }
 
     if (!promter.value) {
-      if (!quickly) {
-        addMessage({
-          ...message,
-          content: 'Суфлёр не активен. Пожалуйста, выберите бота в настройках.',
-          user: systemUser,
-        })
-      }
+      addMessage({
+        ...message,
+        content: 'Суфлёр не активен. Пожалуйста, выберите бота в настройках.',
+        user: systemUser,
+      })
 
       throw new HelpfyPromterError('Суфлер не инициализирован')
     }
@@ -111,7 +107,7 @@ export const useTicket = () => {
 
     setLoading(true)
     try {
-      await getAnswer(textarea)
+      await getAnswer(parsedText, meta)
     } catch (error: any) {
       console.error('Ошибка при получении ответа от суфлёра:', error)
       throw error
@@ -124,7 +120,7 @@ export const useTicket = () => {
     }
   }
 
-  async function getAnswer(textarea: string) {
+  async function getAnswer(textarea: string, meta?: IMeta) {
     if (!promter.value) {
       throw new Error('Суфлёр не настроен для отправки запроса.')
     }
@@ -133,7 +129,7 @@ export const useTicket = () => {
     const botDisplayName = currentBot.value?.name || defaultBotName
 
     try {
-      const response = await promter.value.asc(textarea)
+      const response = await promter.value.asc(textarea, meta)
 
       addMessage({
         id: messageId,
@@ -219,7 +215,7 @@ export const useTicket = () => {
   }
 
   return {
-    addMessageHandler: addMessageHandlerWithAllBots,
+    addMessageHandler: addMessageHandlerWithCondition,
     loadingAnswer,
     messages,
     sendMessageToMainTicket,

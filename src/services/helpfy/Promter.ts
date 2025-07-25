@@ -1,3 +1,4 @@
+import type { IMeta } from '@/modules/ticketCentralBlock/composables/useTicket'
 import {
   botControllerCreateCompletion,
   botControllerGetCompletionStatus,
@@ -7,6 +8,7 @@ import type {
   ResponseCompletionStatusAsyncDto,
 } from './helpfy.schemas'
 import { HelpfyPromterError } from './HelpfyPromterError'
+import HDE from '@/plugin'
 
 export default class HelpfyPromter {
   private readonly userId: number
@@ -124,20 +126,26 @@ export default class HelpfyPromter {
     })
   }
 
-  public async asc(text: string): Promise<ResponseCompletionStatusAsyncDto> {
+  public async asc(
+    text: string,
+    meta?: IMeta
+  ): Promise<ResponseCompletionStatusAsyncDto> {
     if (!text || !text.trim()) {
       throw new HelpfyPromterError(
         'Prompt не может быть пустым.',
         'INITIALIZATION_ERROR'
       )
     }
-
+    const ticketId = HDE.getState().ticketId
     const createDto: CreateBotCompletionDto = {
-      user_id: this.userId,
       prompt: text,
+      meta: {
+        ticket_id: ticketId,
+      },
     }
+    if (meta?.post_id) createDto.meta!.post_id = meta.post_id
 
-    let ticketId: string | undefined
+    let unique_id: string | undefined
 
     try {
       const response = await botControllerCreateCompletion(
@@ -145,17 +153,17 @@ export default class HelpfyPromter {
         createDto
       )
       const creationData = response.data
-      ticketId = creationData.ticket_id
+      unique_id = creationData.unique_id
 
-      if (!ticketId) {
+      if (!unique_id) {
         throw new HelpfyPromterError(
-          'API не вернуло ticket_id при создании запроса.',
+          'API не вернуло unique_id при создании запроса.',
           'NETWORK_ERROR'
         )
       }
 
-      this.activeTickets.add(ticketId)
-      return await this.getAnswerAsync(ticketId)
+      this.activeTickets.add(unique_id)
+      return await this.getAnswerAsync(unique_id)
     } catch (error: any) {
       console.error('HelpfyPromter: Ошибка в ask:', error)
       if (error instanceof HelpfyPromterError) {
@@ -170,8 +178,8 @@ export default class HelpfyPromter {
         error
       )
     } finally {
-      if (ticketId) {
-        this.activeTickets.delete(ticketId)
+      if (unique_id) {
+        this.activeTickets.delete(unique_id)
       }
     }
   }

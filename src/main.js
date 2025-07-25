@@ -20,28 +20,52 @@ HDE.on('ready', async () => {
     const ticketModule = await import(
       './modules/ticketCentralBlock/composables/useTicket'
     )
+    const selectBotModule = await import(
+      './modules/ticketCentralBlock/composables/useSelectBot'
+    )
 
     const useTicket = ticketModule.useTicket
+    const useSelectBot = selectBotModule.useSelectBot
 
+    const { currentBot } = useSelectBot()
     const { addMessageHandler } = useTicket()
-    try {
-      clickOnPluginButton(plugin)
 
-      await sendMessage(true)
-    } catch (error) {
-      setTimeout(async () => {
-        sendMessage()
-      }, 500)
-    }
+    await waitBot()()
 
-    async function sendMessage(force = false) {
+    clickOnPluginButton(plugin)
+
+    await sendMessage()
+
+    async function sendMessage() {
       const messageContent = message?.querySelector(
         '.ticket-conversation__message-html'
       )
       if (!messageContent)
         throw new Error('Не удалось найти сообщение для отправки')
 
-      await addMessageHandler(messageContent.innerHTML, force)
+      await addMessageHandler(messageContent.innerHTML, {
+        post_id: +message.dataset.postId,
+      })
+    }
+
+    function waitBot() {
+      let attempt = 0
+
+      return function waitAttempt() {
+        attempt++
+        if (attempt > 5) return false
+        return new Promise((res) => {
+          setTimeout(async () => {
+            if (currentBot.value) {
+              res(true)
+            } else {
+              const status = await waitAttempt()
+
+              res(status)
+            }
+          }, 300)
+        })
+      }
     }
   }
 
